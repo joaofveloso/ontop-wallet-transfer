@@ -17,7 +17,6 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
@@ -27,20 +26,27 @@ public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
-    @Bean
-    public ProducerFactory<String, WalletMessage> walletProducerFactory() {
+    private Map<String, Object> producerConfig() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-        return new DefaultKafkaProducerFactory<>(configProps, new StringSerializer(), new JsonSerializer<>());
+        return configProps;
     }
 
-    @Bean
-    public KafkaTemplate<String, WalletMessage> kafkaTemplateWalletProducer() {
-        return new KafkaTemplate<>(walletProducerFactory());
+    @Bean("walletProducer")
+    public KafkaTemplate<String, WalletMessage> walletProducer() {
+        DefaultKafkaProducerFactory<String, WalletMessage> factory = new DefaultKafkaProducerFactory<>(
+                producerConfig(), new StringSerializer(), new JsonSerializer<>());
+        return new KafkaTemplate<>(factory);
     }
 
-    @Bean
-    public ConsumerFactory<String, ParentMessage> walletConsumerFactory() {
+    @Bean("paymentProducer")
+    public KafkaTemplate<String, PaymentMessage> paymentProducer() {
+        DefaultKafkaProducerFactory<String, PaymentMessage> factory = new DefaultKafkaProducerFactory<>(
+                producerConfig(), new StringSerializer(), new JsonSerializer<>());
+        return new KafkaTemplate<>(factory);
+    }
+
+    private ConsumerFactory<String, ParentMessage> walletConsumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(),

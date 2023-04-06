@@ -13,6 +13,8 @@ spring:
       password: mypass
   kafka:
     bootstrap-servers: kafka:9092
+  banner:
+    location: classpath:banner.txt
 
 core:
   ontop:
