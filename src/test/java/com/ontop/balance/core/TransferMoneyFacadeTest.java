@@ -18,6 +18,7 @@ import com.ontop.balance.core.model.exceptions.IllegalAmountValueExcpetion;
 import com.ontop.balance.core.model.exceptions.InsufficientBalanceException;
 import com.ontop.balance.core.model.exceptions.InvalidFeeException;
 import com.ontop.balance.core.model.exceptions.RecipientNotFoundException;
+import com.ontop.balance.core.model.exceptions.UnauthorizedAccessToResourceException;
 import com.ontop.balance.core.model.exceptions.WalletNotFoundException;
 import com.ontop.balance.core.ports.outbound.Payment;
 import com.ontop.balance.core.ports.outbound.Recipient;
@@ -51,7 +52,7 @@ class TransferMoneyFacadeTest extends BaseTestCase{
 
         String uuid = UUID.randomUUID().toString();
 
-        var command = new TransferMoneyCommand(uuid, BigDecimal.valueOf(1_000));
+        var command = new TransferMoneyCommand(uuid, 1L, BigDecimal.valueOf(1_000));
         var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
         var balanceData = new BalanceData(BigDecimal.valueOf(10_000));
 
@@ -79,7 +80,7 @@ class TransferMoneyFacadeTest extends BaseTestCase{
     void testHandlerRecipientNotFound() {
 
         String uuid = UUID.randomUUID().toString();
-        var command = new TransferMoneyCommand(uuid, BigDecimal.valueOf(1_000));
+        var command = new TransferMoneyCommand(uuid, 1L, BigDecimal.valueOf(1_000));
 
         doThrow(new RecipientNotFoundException()).when(this.recipient).findRecipientById(anyString());
 
@@ -102,7 +103,7 @@ class TransferMoneyFacadeTest extends BaseTestCase{
         THEN a WalletNotFoundException should be thrown""")
     void testHandlerWalletNotFound() {
         String uuid = UUID.randomUUID().toString();
-        var command = new TransferMoneyCommand(uuid, BigDecimal.valueOf(1_000));
+        var command = new TransferMoneyCommand(uuid, 1L, BigDecimal.valueOf(1_000));
         var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
 
         doReturn(Optional.of(recipientData)).when(this.recipient).findRecipientById(anyString());
@@ -126,7 +127,7 @@ class TransferMoneyFacadeTest extends BaseTestCase{
         THEN a InsufficientBalanceException should be thrown""")
     void testHandlerInsuffiecientBalance() {
         String uuid = UUID.randomUUID().toString();
-        var command = new TransferMoneyCommand(uuid, BigDecimal.valueOf(5_000));
+        var command = new TransferMoneyCommand(uuid, 1L, BigDecimal.valueOf(5_000));
         var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
         var balanceData = new BalanceData(BigDecimal.valueOf(1_000));
 
@@ -165,7 +166,7 @@ class TransferMoneyFacadeTest extends BaseTestCase{
     void testHandlerInvalidAmountForNullValue() {
 
         String uuid = UUID.randomUUID().toString();
-        var command = new TransferMoneyCommand(uuid, null);
+        var command = new TransferMoneyCommand(uuid, 5L, null);
         var recipientData = new RecipientData(uuid, 5L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
 
         doReturn(Optional.of(recipientData)).when(this.recipient).findRecipientById(anyString());
@@ -188,12 +189,35 @@ class TransferMoneyFacadeTest extends BaseTestCase{
         THEN a IllegalAmountValueExcpetion should be thrown""")
     void testHandlerInvalidAmountForNegativeValue() {
         String uuid = UUID.randomUUID().toString();
-        var command = new TransferMoneyCommand(uuid, BigDecimal.valueOf(-100));
+        var command = new TransferMoneyCommand(uuid, 5L, BigDecimal.valueOf(-100));
         var recipientData = new RecipientData(uuid, 5L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
 
         doReturn(Optional.of(recipientData)).when(this.recipient).findRecipientById(anyString());
 
         assertThrows(IllegalAmountValueExcpetion.class,
+                () -> this.transferMoneyFacade.handler(command));
+
+        verify(this.recipient).findRecipientById(eq(command.recipientId()));
+        verify(this.wallet, never()).getBalance(anyLong());
+        verify(this.wallet, never()).withdraw(
+                any(BigDecimal.class), any(RecipientData.class), anyString());
+        verify(this.payment, never()).transfer(
+                any(BigDecimal.class), any(RecipientData.class), anyString());
+    }
+    @Test
+    @DisplayName("""
+        GIVEN a money transfer request to a recipient from another client,
+        WHEN the handler is invoked,
+        THEN a IllegalAmountValueExcpetion should be thrown""")
+    void testHandlerUnauthorizedAccessToRecipient() {
+
+        String uuid = UUID.randomUUID().toString();
+        var command = new TransferMoneyCommand(uuid, 999L, BigDecimal.valueOf(1_000));
+        var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
+
+        doReturn(Optional.of(recipientData)).when(this.recipient).findRecipientById(anyString());
+
+        assertThrows(UnauthorizedAccessToResourceException.class,
                 () -> this.transferMoneyFacade.handler(command));
 
         verify(this.recipient).findRecipientById(eq(command.recipientId()));

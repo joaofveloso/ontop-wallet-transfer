@@ -20,14 +20,15 @@ public class TransferMoneyFacade implements TransferMoney {
     private final Payment payment;
 
     @Override
-    public void handler(TransferMoneyCommand transferCommand) {
+    public void handler(TransferMoneyCommand command) {
 
         final String transactionId = UUID.randomUUID().toString();
 
         RecipientData recipientData = this.recipient.findRecipientById(
-                transferCommand.recipientId()).orElseThrow(RecipientNotFoundException::new);
+                command.recipientId()).orElseThrow(RecipientNotFoundException::new);
+        recipientData.validateOwnership(command.clientId());
 
-        BigDecimal withdrawAmount = transferCommand.amount();
+        BigDecimal withdrawAmount = command.amount();
         BigDecimal transferAmount = recipientData.applyFee(withdrawAmount);
 
         this.wallet.getBalance(recipientData.clientId()).orElseThrow(WalletNotFoundException::new)
