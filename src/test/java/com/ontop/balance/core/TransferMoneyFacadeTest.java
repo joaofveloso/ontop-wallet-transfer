@@ -23,6 +23,7 @@ import com.ontop.balance.core.model.exceptions.WalletNotFoundException;
 import com.ontop.balance.core.model.queries.ObtainRecipientByIdQuery;
 import com.ontop.balance.core.ports.outbound.Payment;
 import com.ontop.balance.core.ports.outbound.Recipient;
+import com.ontop.balance.core.ports.outbound.Transaction;
 import com.ontop.balance.core.ports.outbound.Wallet;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -40,6 +41,8 @@ class TransferMoneyFacadeTest extends BaseTestCase{
     private Wallet wallet;
     @Mock
     private Payment payment;
+    @Mock
+    private Transaction transaction;
     @InjectMocks
     private TransferMoneyFacade transferMoneyFacade;
 

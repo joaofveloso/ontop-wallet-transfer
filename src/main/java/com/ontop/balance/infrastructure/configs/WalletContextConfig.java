@@ -19,8 +19,8 @@ public class WalletContextConfig {
     }
 
     @Bean
-    TransferMoneyFacade transferMoneyFacade(Payment payment, Recipient recipient, Wallet wallet) {
-        return new TransferMoneyFacade(recipient, wallet, payment);
+    TransferMoneyFacade transferMoneyFacade(Payment payment, Recipient recipient, Wallet wallet, Transaction transaction) {
+        return new TransferMoneyFacade(recipient, wallet, payment, transaction);
     }
 
     @Bean

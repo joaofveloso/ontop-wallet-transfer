@@ -11,6 +11,7 @@ import com.ontop.balance.core.ports.inbound.ObtainTransactionsById;
 import com.ontop.balance.core.ports.inbound.TransferMoney;
 import com.ontop.balance.core.ports.outbound.Payment;
 import com.ontop.balance.core.ports.outbound.Recipient;
+import com.ontop.balance.core.ports.outbound.Transaction;
 import com.ontop.balance.core.ports.outbound.Wallet;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -22,6 +23,7 @@ public class TransferMoneyFacade implements TransferMoney{
     private final Recipient recipient;
     private final Wallet wallet;
     private final Payment payment;
+    private final Transaction transaction;
 
     @Override
     public String handler(TransferMoneyCommand command) {
@@ -42,6 +44,8 @@ public class TransferMoneyFacade implements TransferMoney{
         this.wallet.getBalance(recipientData.clientId())
                 .orElseThrow(WalletNotFoundException::new)
                 .checkSufficientBalance(withdrawAmount);
+
+        this.transaction.starNewTransaction(transactionId, command.clientId(), recipientData.id(), recipientData.name());
 
         this.wallet.withdraw(withdrawAmount, recipientData, transactionId);
         this.payment.transfer(transferAmount, recipientData, transactionId);

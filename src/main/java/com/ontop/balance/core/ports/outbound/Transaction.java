@@ -6,4 +6,6 @@ import java.util.Optional;
 public interface Transaction {
 
     Optional<TransactionData> getTransactionsById(String id);
+
+    void starNewTransaction(String transactionId, Long clientId, String id, String name);
 }
