@@ -3,7 +3,6 @@ package com.ontop.balance.app.models;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.ontop.balance.app.controllers.RecipientController;
 import lombok.Getter;
