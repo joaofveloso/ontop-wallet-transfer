@@ -5,7 +5,8 @@ import com.ontop.balance.core.model.RecipientData;
 import com.ontop.balance.core.ports.outbound.Wallet;
 import com.ontop.balance.infrastructure.clients.WalletClient;
 import com.ontop.balance.infrastructure.clients.WalletClient.BalanceResponse;
-import com.ontop.balance.infrastructure.messages.TransferMessage;
+import com.ontop.kernels.PaymentMessage;
+import com.ontop.kernels.WalletMessage;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -13,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,7 +24,7 @@ public class WalletAdapter implements Wallet {
     private String topic;
 
     private final WalletClient walletClient;
-    private final KafkaTemplate<String, TransferMessage> template;
+    private final KafkaTemplate<String, WalletMessage> template;
 
     @Override
     public void chargeback(String transactionId) {
@@ -33,13 +33,10 @@ public class WalletAdapter implements Wallet {
 
     @Override
     public void withdraw(BigDecimal amount, RecipientData recipientData, String transactionId) {
-        ProducerRecord<String, TransferMessage> record = new ProducerRecord<>(this.topic,
-                new TransferMessage(recipientData.clientId(), recipientData.id(),
-                        recipientData.name(), recipientData.routingNumber(),
-                        recipientData.nationalIdentification(), recipientData.accountNumber(),
-                        amount, transactionId));
-        record.headers().add("x-transaction-id", transactionId.getBytes(StandardCharsets.UTF_8));
-        this.template.send(record);
+        ProducerRecord<String, WalletMessage> walletRecord = new ProducerRecord<>(this.topic,
+                new WalletMessage(recipientData.clientId(), amount, transactionId));
+        walletRecord.headers().add("x-transaction-id", transactionId.getBytes(StandardCharsets.UTF_8));
+        this.template.send(walletRecord);
     }
 
     @Override
