@@ -7,14 +7,20 @@ springdoc:
 spring:
   data:
     mongodb:
-      uri: mongodb://myuser:mypass@localhost:27017
+      uri: mongodb://myuser:mypass@mongodb:27017
       database: ontop
       username: myuser
       password: mypass
+  kafka:
+    bootstrap-servers: kafka:9092
 
 core:
   ontop:
     fee: 0.1
+  topic: money-transfer-transactions
+  wallet:
+    client:
+      url: http://mockoon.tools.getontop.com:3000
 
 jwt:
   secret: F0ApiorWr+AGvvDBjf6d3Bz6rpewBTL0RqWsg71J/HY=

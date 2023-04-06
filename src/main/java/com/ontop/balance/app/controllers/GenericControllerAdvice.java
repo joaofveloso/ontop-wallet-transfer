@@ -2,6 +2,8 @@ package com.ontop.balance.app.controllers;
 
 import com.ontop.balance.app.models.ErrorResponse;
 import com.ontop.balance.app.models.ErrorResponse.SubErrorResponse;
+import com.ontop.balance.core.model.exceptions.InsufficientBalanceException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,14 @@ public class GenericControllerAdvice {
                 .map(this::getSubErrorResponse)
                 .collect(Collectors.toList());
         return new ErrorResponse("Validation failed!", subErrors);
+    }
+
+    @ExceptionHandler(InsufficientBalanceException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInsufficientBalanceException(InsufficientBalanceException exception) {
+        return new ErrorResponse("Insufficient balance", Collections.singletonList(
+                new ErrorResponse.SubErrorResponse("balance", "The account balance is not sufficient for this transaction")
+        ));
     }
 
     private SubErrorResponse getSubErrorResponse(FieldError fieldError) {

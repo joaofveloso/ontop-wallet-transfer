@@ -39,7 +39,8 @@ public class TransferMoneyFacade implements TransferMoney{
         BigDecimal withdrawAmount = command.amount();
         BigDecimal transferAmount = recipientData.applyFee(withdrawAmount);
 
-        this.wallet.getBalance(recipientData.clientId()).orElseThrow(WalletNotFoundException::new)
+        this.wallet.getBalance(recipientData.clientId())
+                .orElseThrow(WalletNotFoundException::new)
                 .checkSufficientBalance(withdrawAmount);
 
         this.wallet.withdraw(withdrawAmount, recipientData, transactionId);

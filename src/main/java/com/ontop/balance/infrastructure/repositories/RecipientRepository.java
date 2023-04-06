@@ -9,6 +9,5 @@ import java.util.List;
 
 public interface RecipientRepository extends MongoRepository<RecipientEntity, String> {
 
-    List<RecipientEntity> getRecipientEntityByClientId(Long clientId);
     Page<RecipientEntity> findAllByClientId(Long clientId, Pageable pageable);
 }

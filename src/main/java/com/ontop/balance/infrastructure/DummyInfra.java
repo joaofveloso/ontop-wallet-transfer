@@ -16,42 +16,11 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DummyInfra implements Payment, Wallet, Transaction {
+public class DummyInfra implements Payment, Transaction {
 
     @Override
     public void transfer(BigDecimal amount, RecipientData recipientData, String transactionId) {
 
-    }
-
-    public void save(CreateRecipientCommand createRecipientCommand, String uuid) {
-
-    }
-
-    public PaginatedWrapper<RecipientData> findRecipients(Long clientId) {
-
-        return new PaginatedWrapper<>(
-                List.of(new RecipientData("$UUID", 5L, "John Doe", "123456", "4564", "4056", BigDecimal.valueOf(0.07))),
-                new PaginatedData(0,1,5));
-    }
-
-    public Optional<RecipientData> findRecipientById(String id) {
-        return Optional.empty();
-    }
-
-
-    @Override
-    public void chargeback(String transactionId) {
-
-    }
-
-    @Override
-    public void withdraw(BigDecimal amount, RecipientData recipientData, String transactionId) {
-
-    }
-
-    @Override
-    public Optional<BalanceData> getBalance(Long clientId) {
-        return Optional.empty();
     }
 
     @Override
