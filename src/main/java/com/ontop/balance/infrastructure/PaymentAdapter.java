@@ -6,10 +6,11 @@ import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DummyInfra implements Payment {
+public class PaymentAdapter implements Payment {
 
     @Override
     public void transfer(BigDecimal amount, RecipientData recipientData, String transactionId) {
+
 
     }
 }

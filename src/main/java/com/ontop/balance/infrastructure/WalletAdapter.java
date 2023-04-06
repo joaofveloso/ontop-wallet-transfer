@@ -34,8 +34,7 @@ public class WalletAdapter implements Wallet {
     @Override
     public void withdraw(BigDecimal amount, RecipientData recipientData, String transactionId) {
         ProducerRecord<String, WalletMessage> walletRecord = new ProducerRecord<>(this.topic,
-                new WalletMessage(recipientData.clientId(), amount, transactionId));
-        walletRecord.headers().add("x-transaction-id", transactionId.getBytes(StandardCharsets.UTF_8));
+                transactionId, new WalletMessage(recipientData.clientId(), amount, transactionId));
         this.template.send(walletRecord);
     }
 

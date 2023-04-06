@@ -1,5 +1,6 @@
 package com.ontop.balance.infrastructure.configs;
 
+import com.ontop.kernels.ParentMessage;
 import com.ontop.kernels.PaymentMessage;
 import com.ontop.kernels.WalletMessage;
 import java.util.HashMap;
@@ -39,16 +40,16 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, WalletMessage> walletConsumerFactory() {
+    public ConsumerFactory<String, ParentMessage> walletConsumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(),
-                new JsonDeserializer<>(WalletMessage.class));
+                new JsonDeserializer<>(ParentMessage.class));
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, WalletMessage> walletListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, WalletMessage> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, ParentMessage> walletListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ParentMessage> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(walletConsumerFactory());
         return factory;
     }
