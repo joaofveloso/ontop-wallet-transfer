@@ -13,7 +13,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class RecipientFacadeByClient implements CreateRecipient, ObtainRecipientByClient,
+public class RecipientFacade implements CreateRecipient, ObtainRecipientByClient,
         ObtainRecipientById {
 
     private final Recipient recipient;
@@ -27,11 +27,13 @@ public class RecipientFacadeByClient implements CreateRecipient, ObtainRecipient
 
     @Override
     public PaginatedWrapper<RecipientData> handler(ObtainRecipientByClientQuery query) {
-        return this.recipient.findRecipients(query.clientId());
+        return this.recipient.findRecipients(query);
     }
 
     @Override
     public RecipientData handler(ObtainRecipientByIdQuery query) {
-        return this.recipient.findRecipientById(query.id()).orElseThrow();
+        RecipientData recipientData = this.recipient.findRecipientById(query).orElseThrow();//TODO: add exceptions
+        recipientData.validateOwnership(query.clientId());
+        return recipientData;
     }
 }

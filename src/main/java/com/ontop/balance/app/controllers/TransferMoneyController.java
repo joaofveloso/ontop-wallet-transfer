@@ -2,8 +2,11 @@ package com.ontop.balance.app.controllers;
 
 import com.ontop.balance.app.LocationUtils;
 import com.ontop.balance.app.models.TransactionItemResponse;
+import com.ontop.balance.app.models.TransactionItemResponse.TransactionStepResponse;
 import com.ontop.balance.app.models.TransferMoneyRequest;
+import com.ontop.balance.core.model.TransactionData;
 import com.ontop.balance.core.model.commands.TransferMoneyCommand;
+import com.ontop.balance.core.model.queries.ObtainTransactionByIdQuery;
 import com.ontop.balance.core.ports.inbound.ObtainTransactionsById;
 import com.ontop.balance.core.ports.inbound.TransferMoney;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +34,12 @@ public class TransferMoneyController implements TransferMoneyControllerDoc {
     @Override
     public ResponseEntity<TransactionItemResponse> obtainTransactionsById(
             Long clientId, String transaction) {
-//        return this.obtainTransactionsById.han;
-        return null;
+        TransactionData handler = this.obtainTransactionsById.handler(
+                new ObtainTransactionByIdQuery(transaction, clientId));
+        return ResponseEntity.ok(
+                new TransactionItemResponse(handler.transactionId(), handler.createdAt(),
+                        handler.steps().stream().map(
+                                step -> new TransactionStepResponse(step.createdAt(),
+                                        step.targetSystem(), step.status().toString())).toList()));
     }
 }

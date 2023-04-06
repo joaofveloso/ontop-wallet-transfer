@@ -45,7 +45,7 @@ public class RecipientController implements RecipientControllerDoc {
     public ResponseEntity<RecipientResponseWrapper> obtainRecipients(
             Long clientId, int page, int size) {
         RecipientResponse recipientResponse = toRecipientResponse(
-                obtainRecipientByClient.handler(new ObtainRecipientByClientQuery(clientId)));
+                obtainRecipientByClient.handler(new ObtainRecipientByClientQuery(clientId, page, size)));
         RecipientResponseWrapper recipientResponseWrapper = new RecipientResponseWrapper(
                 recipientResponse);
         return ResponseEntity.ok(recipientResponseWrapper);
@@ -53,8 +53,7 @@ public class RecipientController implements RecipientControllerDoc {
 
     @Override
     public ResponseEntity<RecipientItemWrapper> obtainRecipientById(Long clientId, String id) {
-        RecipientData handler = this.obtainRecipientById.handler(new ObtainRecipientByIdQuery(id));
-        handler.validateOwnership(clientId);
+        RecipientData handler = this.obtainRecipientById.handler(new ObtainRecipientByIdQuery(id, clientId));
         RecipientItemWrapper recipientItemWrapper = new RecipientItemWrapper(
                 new RecipientResponseItem(handler.id(), handler.name(),
                         handler.routingNumber(), handler.accountNumber()));

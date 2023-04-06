@@ -1,6 +1,6 @@
 package com.ontop.balance.infrastructure.configs;
 
-import com.ontop.balance.core.RecipientFacadeByClient;
+import com.ontop.balance.core.RecipientFacade;
 import com.ontop.balance.core.TransactionFacade;
 import com.ontop.balance.core.TransferMoneyFacade;
 import com.ontop.balance.core.ports.outbound.Payment;
@@ -14,8 +14,8 @@ import org.springframework.context.annotation.Configuration;
 public class WalletContextConfig {
 
     @Bean
-    RecipientFacadeByClient recipientFacade(Recipient recipient) {
-        return new RecipientFacadeByClient(recipient);
+    RecipientFacade recipientFacade(Recipient recipient) {
+        return new RecipientFacade(recipient);
     }
 
     @Bean

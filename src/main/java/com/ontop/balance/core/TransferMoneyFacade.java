@@ -5,6 +5,7 @@ import com.ontop.balance.core.model.commands.TransferMoneyCommand;
 import com.ontop.balance.core.model.RecipientData;
 import com.ontop.balance.core.model.exceptions.RecipientNotFoundException;
 import com.ontop.balance.core.model.exceptions.WalletNotFoundException;
+import com.ontop.balance.core.model.queries.ObtainRecipientByIdQuery;
 import com.ontop.balance.core.model.queries.ObtainTransactionByIdQuery;
 import com.ontop.balance.core.ports.inbound.ObtainTransactionsById;
 import com.ontop.balance.core.ports.inbound.TransferMoney;
@@ -27,8 +28,12 @@ public class TransferMoneyFacade implements TransferMoney{
 
         final String transactionId = UUID.randomUUID().toString();
 
-        RecipientData recipientData = this.recipient.findRecipientById(
-                command.recipientId()).orElseThrow(RecipientNotFoundException::new);
+        ObtainRecipientByIdQuery obtainRecipientByIdQuery = new ObtainRecipientByIdQuery(
+                command.recipientId(), command.clientId());
+
+        RecipientData recipientData = this.recipient
+                .findRecipientById(obtainRecipientByIdQuery)
+                .orElseThrow(RecipientNotFoundException::new);
         recipientData.validateOwnership(command.clientId());
 
         BigDecimal withdrawAmount = command.amount();

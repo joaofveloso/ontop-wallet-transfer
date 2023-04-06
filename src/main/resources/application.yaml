@@ -4,5 +4,17 @@ server:
 springdoc:
   show-actuator: true
 
+spring:
+  data:
+    mongodb:
+      uri: mongodb://myuser:mypass@localhost:27017
+      database: ontop
+      username: myuser
+      password: mypass
+
+core:
+  ontop:
+    fee: 0.1
+
 jwt:
   secret: F0ApiorWr+AGvvDBjf6d3Bz6rpewBTL0RqWsg71J/HY=

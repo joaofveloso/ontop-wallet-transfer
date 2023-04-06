@@ -16,5 +16,4 @@ public record TransferMoneyRequest(
         @NotNull
         @DecimalMin(value = "1.00", message = "Transfer amount must be greater than or equal to 1.00")
         @Schema(description = "The amount of money to transfer to the recipient account", example = "1000.00")
-        BigDecimal amount
-) {}
+        BigDecimal amount) {}

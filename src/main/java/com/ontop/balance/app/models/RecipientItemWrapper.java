@@ -15,7 +15,8 @@ public class RecipientItemWrapper extends RepresentationModel<RecipientItemWrapp
     public RecipientItemWrapper(RecipientResponseItem data, Link... links) {
         this.data = data;
         add(links);
-        add(linkTo(methodOn(RecipientController.class).obtainRecipientById(null, data.id())).withSelfRel());
-        //TODO: Create links to wallet transfer
+        add(linkTo(methodOn(RecipientController.class)
+                .obtainRecipientById(null, data.id()))
+                .withSelfRel());
     }
 }

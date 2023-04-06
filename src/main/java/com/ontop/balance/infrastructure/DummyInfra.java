@@ -16,19 +16,17 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DummyInfra implements Payment, Recipient, Wallet, Transaction {
+public class DummyInfra implements Payment, Wallet, Transaction {
 
     @Override
     public void transfer(BigDecimal amount, RecipientData recipientData, String transactionId) {
 
     }
 
-    @Override
     public void save(CreateRecipientCommand createRecipientCommand, String uuid) {
 
     }
 
-    @Override
     public PaginatedWrapper<RecipientData> findRecipients(Long clientId) {
 
         return new PaginatedWrapper<>(
@@ -36,7 +34,6 @@ public class DummyInfra implements Payment, Recipient, Wallet, Transaction {
                 new PaginatedData(0,1,5));
     }
 
-    @Override
     public Optional<RecipientData> findRecipientById(String id) {
         return Optional.empty();
     }
