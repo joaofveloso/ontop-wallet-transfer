@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/transactions")
 @SecurityScheme(name = HttpHeaders.AUTHORIZATION, type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")
 @Tag(name = "Transfer Money", description = "Endpoints for creating money transfer requests")
-public interface TrasnferMoneyControllerDoc {
+public interface TransferMoneyControllerDoc {
 
     @PostMapping
     @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)

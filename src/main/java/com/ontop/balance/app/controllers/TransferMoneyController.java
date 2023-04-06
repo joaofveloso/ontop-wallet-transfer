@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class TransferMoneyController implements TrasnferMoneyControllerDoc {
+public class TransferMoneyController implements TransferMoneyControllerDoc {
 
     private final TransferMoney transferMoney;
     private final ObtainTransactionsById obtainTransactionsById;
