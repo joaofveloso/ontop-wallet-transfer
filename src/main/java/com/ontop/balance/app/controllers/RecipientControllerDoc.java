@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@RequestMapping("/recipient")
+@RequestMapping("/recipients")
 @SecurityScheme(name = HttpHeaders.AUTHORIZATION, type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")
 @Tag(name = "Recipients", description = "Operations related to creating and obtaining recipient accounts")
 public interface RecipientControllerDoc {
@@ -73,6 +73,4 @@ public interface RecipientControllerDoc {
     ResponseEntity<RecipientItemWrapper> obtainRecipientById(
             @Parameter(hidden = true) @RequestHeader("X-Client-Id") Long clientId,
             @PathVariable("id") String id);
-
-    //TODO: Validate if client can see the recipient account
 }

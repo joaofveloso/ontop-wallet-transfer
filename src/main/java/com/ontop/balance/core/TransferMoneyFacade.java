@@ -1,9 +1,12 @@
 package com.ontop.balance.core;
 
+import com.ontop.balance.core.model.TransactionData;
 import com.ontop.balance.core.model.commands.TransferMoneyCommand;
 import com.ontop.balance.core.model.RecipientData;
 import com.ontop.balance.core.model.exceptions.RecipientNotFoundException;
 import com.ontop.balance.core.model.exceptions.WalletNotFoundException;
+import com.ontop.balance.core.model.queries.ObtainTransactionByIdQuery;
+import com.ontop.balance.core.ports.inbound.ObtainTransactionsById;
 import com.ontop.balance.core.ports.inbound.TransferMoney;
 import com.ontop.balance.core.ports.outbound.Payment;
 import com.ontop.balance.core.ports.outbound.Recipient;
@@ -13,14 +16,14 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class TransferMoneyFacade implements TransferMoney {
+public class TransferMoneyFacade implements TransferMoney{
 
     private final Recipient recipient;
     private final Wallet wallet;
     private final Payment payment;
 
     @Override
-    public void handler(TransferMoneyCommand command) {
+    public String handler(TransferMoneyCommand command) {
 
         final String transactionId = UUID.randomUUID().toString();
 
@@ -36,5 +39,7 @@ public class TransferMoneyFacade implements TransferMoney {
 
         this.wallet.withdraw(withdrawAmount, recipientData, transactionId);
         this.payment.transfer(transferAmount, recipientData, transactionId);
+
+        return transactionId;
     }
 }

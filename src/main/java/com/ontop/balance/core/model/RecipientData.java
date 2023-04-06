@@ -4,7 +4,6 @@ import com.ontop.balance.core.model.exceptions.InvalidFeeException;
 import com.ontop.balance.core.model.exceptions.UnauthorizedAccessToResourceException;
 import java.math.BigDecimal;
 import java.util.Objects;
-import org.springframework.web.client.HttpClientErrorException.Unauthorized;
 
 public record RecipientData(
         String id, Long clientId, String name, String routingNumber, String nationalIdentification,
