@@ -1,13 +1,15 @@
 package com.ontop.balance.core;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
+import com.ontop.balance.core.model.PaginatedWrapper;
 import com.ontop.balance.core.model.RecipientData;
 import com.ontop.balance.core.model.commands.CreateRecipientCommand;
-import com.ontop.balance.core.model.queries.ObtainRecipientQuery;
+import com.ontop.balance.core.model.queries.ObtainRecipientByClientQuery;
 import com.ontop.balance.core.ports.outbound.Recipient;
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,7 +24,7 @@ class RecipientFacadeTest extends BaseTestCase {
     @Mock
     private Recipient recipient;
     @InjectMocks
-    private RecipientFacade recipientFacade;
+    private RecipientFacadeByClient recipientFacade;
 
     @Test
     @DisplayName("""
@@ -33,11 +35,11 @@ class RecipientFacadeTest extends BaseTestCase {
 
         var command = new CreateRecipientCommand(1L, "John Doe", "123", "456", "789");
 
-        doNothing().when(this.recipient).save(eq(command));
+        doNothing().when(this.recipient).save(eq(command), anyString());
 
         this.recipientFacade.handler(command);
 
-        verify(this.recipient).save(command);
+        verify(this.recipient).save(eq(command), anyString());
     }
 
     @Test
@@ -47,13 +49,15 @@ class RecipientFacadeTest extends BaseTestCase {
         THEN a list of recipients should be returned""")
     void testHandlerObtainRecipientSuccessfull() {
 
-        var query = new ObtainRecipientQuery(5L);
-        var recipientData = new RecipientData(5L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
+        var query = new ObtainRecipientByClientQuery(5L);
+        var recipientData = new RecipientData("$UUID", 5L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
 
-        doReturn(List.of(recipientData))
-                .when(this.recipient).findRecipients(query.clientId());
+        PaginatedWrapper<RecipientData> wrapper = new PaginatedWrapper<>(
+                List.of(recipientData), null);
 
-        List<RecipientData> response = this.recipientFacade.handler(query);
+        doReturn(wrapper).when(this.recipient).findRecipients(eq(query.clientId()));
+
+        List<RecipientData> response = this.recipientFacade.handler(query).data();
 
         Assertions.assertThat(response).hasSizeGreaterThan(0);
     }

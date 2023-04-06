@@ -4,5 +4,5 @@ import com.ontop.balance.core.model.commands.CreateRecipientCommand;
 
 public interface CreateRecipient {
 
-    void handler(CreateRecipientCommand createRecipientCommand);
+    String handler(CreateRecipientCommand createRecipientCommand);
 }

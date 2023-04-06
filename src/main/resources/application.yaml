@@ -1,0 +1,8 @@
+server:
+  port: 8080
+
+springdoc:
+  show-actuator: true
+
+jwt:
+  secret: F0ApiorWr+AGvvDBjf6d3Bz6rpewBTL0RqWsg71J/HY=

@@ -4,7 +4,7 @@ import com.ontop.balance.core.model.exceptions.InvalidFeeException;
 import java.math.BigDecimal;
 
 public record RecipientData(
-        Long clientId, String name, String routingNumber, String nationalIdentification,
+        String id, Long clientId, String name, String routingNumber, String nationalIdentification,
         String accountNumber, BigDecimal fee) {
 
     public RecipientData {
