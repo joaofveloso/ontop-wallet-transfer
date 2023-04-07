@@ -34,7 +34,7 @@ public class RecipientController implements RecipientControllerDoc {
     @Override
     public ResponseEntity<Void> createRecipient(Long clientId, CreateRecipientAccountRequest request) {
         String key = this.createRecipient.handler(
-                new CreateRecipientCommand(clientId, request.name() + request.surname(),
+                new CreateRecipientCommand(clientId, request.name() + " " + request.surname(),
                         request.routingNumber(), request.identificationNumber(),
                         request.accountNumber()));
         HttpHeaders headers = LocationUtils.getHttpHeadersWithLocation(key);

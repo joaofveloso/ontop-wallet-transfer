@@ -19,7 +19,8 @@ public record TransactionData(String transactionId, Long clientId, LocalDateTime
         PENDING("Pending"),
         IN_PROGRESS("In Progress"),
         COMPLETED("Completed"),
-        FAILED("Failed");
+        FAILED("Failed"),
+        CANCELED("Canceled");
 
         private final String status;
 

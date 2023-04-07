@@ -9,6 +9,7 @@ import com.ontop.balance.infrastructure.clients.WalletClient.BalanceClientRespon
 import com.ontop.balance.infrastructure.clients.WalletClient.TransactionClientRequest;
 import com.ontop.balance.infrastructure.clients.WalletClient.TransactionClientResponse;
 import com.ontop.kernels.WalletMessage;
+import feign.FeignException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -16,11 +17,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class WalletAdapter implements Wallet {
@@ -60,10 +63,14 @@ public class WalletAdapter implements Wallet {
     @Override
     public void withdraw(WalletMessage message, BiConsumer<String, TransactionStatus> consumer) {
         consumer.accept(this.getClass().getSimpleName(), TransactionStatus.IN_PROGRESS);
-        this.walletClient.executeTransaction(
-                new TransactionClientRequest(message.getAmount(), message.getClientId()));
-        //TODO: check for exceptions when calling it
-        consumer.accept(this.getClass().getSimpleName(), TransactionStatus.COMPLETED);
+        try {
+            this.walletClient.executeTransaction(
+                    new TransactionClientRequest(message.getAmount(), message.getClientId()));
+            consumer.accept(this.getClass().getSimpleName(), TransactionStatus.COMPLETED);
+        } catch (FeignException e) {
+            log.error("Transaction >>> {}: {}", message.getTransactionId(), e.getMessage());
+            consumer.accept(this.getClass().getSimpleName(), TransactionStatus.FAILED);
+        }
     }
 
     @Override
