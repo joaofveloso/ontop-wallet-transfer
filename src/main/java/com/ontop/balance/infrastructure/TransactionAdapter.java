@@ -1,10 +1,14 @@
 package com.ontop.balance.infrastructure;
 
 import com.ontop.balance.core.model.TransactionData;
+import com.ontop.balance.core.model.TransactionData.TransactionItemData;
+import com.ontop.balance.core.model.TransactionData.TransactionStatus;
 import com.ontop.balance.core.ports.outbound.Transaction;
 import com.ontop.balance.infrastructure.entity.TransactionEntity;
+import com.ontop.balance.infrastructure.entity.TransactionEntity.TransactionItem;
 import com.ontop.balance.infrastructure.repositories.TransactionRepository;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -22,16 +26,12 @@ public class TransactionAdapter implements Transaction {
 
     public TransactionData toTransactionData(TransactionEntity entity) {
 
-     //TODO: create sub transactions
-       /*
-        List<TransactionData.TransactionItemData> itemDataList = new ArrayList<>();
-        for (TransactionItemEntity item : entity.getItems()) {
-            itemDataList.add(new TransactionData.TransactionItemData(item.getCreatedAt(),
-                    item.getTargetSystem(), item.getStatus()));
-        }
-        */
-
-        return new TransactionData(entity.getId(), entity.getClientId(), entity.getCreatedAt(), Collections.emptyList());
+        List<TransactionItemData> transactionItemData = entity.getSteps().stream()
+                .map(step -> new TransactionItemData(step.getCreatedAt(),
+                        step.getTargetSystem(), TransactionStatus.valueOf(step.getStatus())))
+                .toList();
+        return new TransactionData(
+                entity.getId(), entity.getClientId(), entity.getCreatedAt(), transactionItemData);
     }
 
     @Override
@@ -39,6 +39,16 @@ public class TransactionAdapter implements Transaction {
 
         TransactionEntity transactionEntity = new TransactionEntity(transactionId, clientId, recipientId,
                 name);
-        transactionRepository.save(transactionEntity);
+        this.transactionRepository.save(transactionEntity);
+    }
+
+    @Override
+    public void addStepToTransaction(
+            String transactionId, String targetSystem, TransactionStatus status) {
+
+        TransactionEntity transactionEntity = this.transactionRepository.findById(transactionId)
+                .orElseThrow(); // TODO: handle exception
+        transactionEntity.getSteps().add(new TransactionItem(targetSystem, status.toString()));
+        this.transactionRepository.save(transactionEntity);
     }
 }

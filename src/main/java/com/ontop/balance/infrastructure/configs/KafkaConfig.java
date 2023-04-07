@@ -46,7 +46,7 @@ public class KafkaConfig {
         return new KafkaTemplate<>(factory);
     }
 
-    private ConsumerFactory<String, ParentMessage> walletConsumerFactory() {
+    private ConsumerFactory<String, ParentMessage> consumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(),
@@ -54,9 +54,9 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ParentMessage> walletListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, ParentMessage> listenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ParentMessage> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(walletConsumerFactory());
+        factory.setConsumerFactory(consumerFactory());
         return factory;
     }
 }

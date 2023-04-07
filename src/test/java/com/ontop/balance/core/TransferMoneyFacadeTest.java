@@ -66,17 +66,19 @@ class TransferMoneyFacadeTest extends BaseTestCase{
                 ObtainRecipientByIdQuery.class));
         doReturn(Optional.of(balanceData)).when(this.wallet).getBalance(anyLong());
         doNothing().when(this.wallet)
-                .withdraw(any(BigDecimal.class), any(RecipientData.class), anyString());
+                .withdraw(any(BigDecimal.class), any(RecipientData.class), anyString(),
+                        any());
         doNothing().when(this.payment)
-                .transfer(any(BigDecimal.class), any(RecipientData.class), anyString());
+                .transfer(any(BigDecimal.class), any(RecipientData.class), anyString(),
+                        any());
 
         this.transferMoneyFacade.handler(command);
 
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet).getBalance(eq(recipientData.clientId()));
-        verify(this.wallet).withdraw(eq(command.amount()), eq(recipientData), anyString());
+        verify(this.wallet).withdraw(eq(command.amount()), eq(recipientData), anyString(), any());
         verify(this.payment).transfer(
-                eq(recipientData.applyFee(command.amount())), eq(recipientData), anyString());
+                eq(recipientData.applyFee(command.amount())), eq(recipientData), anyString(), any());
     }
 
     @Test
@@ -101,9 +103,9 @@ class TransferMoneyFacadeTest extends BaseTestCase{
 
         verify(this.wallet, never()).getBalance(anyLong());
         verify(this.wallet, never()).withdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
         verify(this.payment, never()).transfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
     }
 
     @Test
@@ -128,9 +130,9 @@ class TransferMoneyFacadeTest extends BaseTestCase{
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet).getBalance(eq(recipientData.clientId()));
         verify(this.wallet, never()).withdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
         verify(this.payment, never()).transfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
     }
 
     @Test
@@ -156,9 +158,9 @@ class TransferMoneyFacadeTest extends BaseTestCase{
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet).getBalance(eq(recipientData.clientId()));
         verify(this.wallet, never()).withdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
         verify(this.payment, never()).transfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
     }
 
     @Test
@@ -196,9 +198,9 @@ class TransferMoneyFacadeTest extends BaseTestCase{
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet, never()).getBalance(anyLong());
         verify(this.wallet, never()).withdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
         verify(this.payment, never()).transfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
     }
 
     @Test
@@ -222,9 +224,9 @@ class TransferMoneyFacadeTest extends BaseTestCase{
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet, never()).getBalance(anyLong());
         verify(this.wallet, never()).withdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
         verify(this.payment, never()).transfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
     }
     @Test
     @DisplayName("""
@@ -248,8 +250,8 @@ class TransferMoneyFacadeTest extends BaseTestCase{
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet, never()).getBalance(anyLong());
         verify(this.wallet, never()).withdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
         verify(this.payment, never()).transfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+                any(BigDecimal.class), any(RecipientData.class), anyString(), any());
     }
 }

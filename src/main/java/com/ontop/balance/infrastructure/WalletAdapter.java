@@ -10,11 +10,14 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
+import org.springframework.util.concurrent.ListenableFuture;
 
 @Component
 @RequiredArgsConstructor
@@ -32,12 +35,19 @@ public class WalletAdapter implements Wallet {
     }
 
     @Override
-    public void withdraw(BigDecimal amount, RecipientData recipientData, String transactionId) {
+    public void withdraw(BigDecimal amount, RecipientData recipientData, String transactionId,
+            Consumer<String> stringConsumer) {
         ProducerRecord<String, WalletMessage> walletRecord = new ProducerRecord<>(this.topic,
                 transactionId, new WalletMessage(recipientData.clientId(), amount, transactionId));
         walletRecord.headers().add("x-transaction-id", transactionId.getBytes(StandardCharsets.UTF_8));
         try {
-            this.walletProducer.send(walletRecord).get();
+            var send = this.walletProducer.send(walletRecord);
+            send.addCallback(success -> {
+                stringConsumer.accept(this.getClass().getSimpleName());
+            }, ex -> {});
+            send.get();
+
+            //TODO: Deal with other exceptions
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
