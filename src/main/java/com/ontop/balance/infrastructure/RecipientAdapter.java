@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class RecipientAdapter implements Recipient {
     private final RecipientRepository recipientRepository;
 
     @Override
+    @Transactional
     public void save(CreateRecipientCommand command, String uuid) {
         RecipientEntity recipientEntity = new RecipientEntity(uuid, command.clientId(), command.name(),
                 command.routingNumber(), command.nationalIdentification(), command.accountNumber());
@@ -51,6 +53,7 @@ public class RecipientAdapter implements Recipient {
     }
 
     @Override
+    @Transactional
     public Optional<RecipientData> findRecipientById(ObtainRecipientByIdQuery query) {
         return this.recipientRepository.findById(query.id()).map(
                 recipient -> new RecipientData(recipient.getId(),

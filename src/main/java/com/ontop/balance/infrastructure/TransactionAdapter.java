@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class TransactionAdapter implements Transaction {
         return this.transactionRepository.findById(id).map(this::toTransactionData);
     }
 
-    public TransactionData toTransactionData(TransactionEntity entity) {
+    private TransactionData toTransactionData(TransactionEntity entity) {
 
         List<TransactionItemData> transactionItemData = entity.getSteps().stream()
                 .map(step -> new TransactionItemData(step.getCreatedAt(),
@@ -35,6 +36,7 @@ public class TransactionAdapter implements Transaction {
     }
 
     @Override
+    @Transactional
     public void starNewTransaction(String transactionId, Long clientId, String recipientId, String name) {
 
         TransactionEntity transactionEntity = new TransactionEntity(transactionId, clientId, recipientId,

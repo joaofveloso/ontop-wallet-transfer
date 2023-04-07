@@ -19,6 +19,12 @@ spring:
 core:
   ontop:
     fee: 0.1
+    source:
+      name: ONTOP INC
+      account: 0245253419
+      currency: USD
+      routing: 028444018
+
   topic: money-transfer-transactions
   wallet:
     client:

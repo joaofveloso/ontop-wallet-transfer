@@ -2,22 +2,24 @@ package com.ontop.balance.infrastructure;
 
 import com.ontop.balance.core.model.BalanceData;
 import com.ontop.balance.core.model.RecipientData;
+import com.ontop.balance.core.model.TransactionData.TransactionStatus;
 import com.ontop.balance.core.ports.outbound.Wallet;
 import com.ontop.balance.infrastructure.clients.WalletClient;
-import com.ontop.balance.infrastructure.clients.WalletClient.BalanceResponse;
+import com.ontop.balance.infrastructure.clients.WalletClient.BalanceClientResponse;
+import com.ontop.balance.infrastructure.clients.WalletClient.TransactionClientRequest;
+import com.ontop.balance.infrastructure.clients.WalletClient.TransactionClientResponse;
 import com.ontop.kernels.WalletMessage;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
 
 @Component
 @RequiredArgsConstructor
@@ -35,7 +37,7 @@ public class WalletAdapter implements Wallet {
     }
 
     @Override
-    public void withdraw(BigDecimal amount, RecipientData recipientData, String transactionId,
+    public void prepareWithdraw(BigDecimal amount, RecipientData recipientData, String transactionId,
             Consumer<String> stringConsumer) {
         ProducerRecord<String, WalletMessage> walletRecord = new ProducerRecord<>(this.topic,
                 transactionId, new WalletMessage(recipientData.clientId(), amount, transactionId));
@@ -56,8 +58,17 @@ public class WalletAdapter implements Wallet {
     }
 
     @Override
+    public void withdraw(WalletMessage message, BiConsumer<String, TransactionStatus> consumer) {
+        consumer.accept(this.getClass().getSimpleName(), TransactionStatus.IN_PROGRESS);
+        this.walletClient.executeTransaction(
+                new TransactionClientRequest(message.getAmount(), message.getClientId()));
+        //TODO: check for exceptions when calling it
+        consumer.accept(this.getClass().getSimpleName(), TransactionStatus.COMPLETED);
+    }
+
+    @Override
     public Optional<BalanceData> getBalance(Long clientId) {
-        BalanceResponse balance = walletClient.getBalance(clientId);
+        BalanceClientResponse balance = walletClient.getBalance(clientId);
         return Optional.of(new BalanceData(BigDecimal.valueOf(balance.balance())));
     }
 }

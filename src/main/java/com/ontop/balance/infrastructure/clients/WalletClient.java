@@ -1,7 +1,9 @@
 package com.ontop.balance.infrastructure.clients;
 
+import java.math.BigDecimal;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,7 +13,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface WalletClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/wallets/balance", consumes = "application/json")
-    BalanceResponse getBalance(@RequestParam("user_id") Long userId);
+    BalanceClientResponse getBalance(@RequestParam("user_id") Long userId);
 
-    record BalanceResponse(Long balance, Long user_id) {}
+    @RequestMapping(method = RequestMethod.POST, value = "/wallets/transactions", consumes = "application/json")
+    TransactionClientResponse executeTransaction(@RequestBody TransactionClientRequest request);
+
+    record BalanceClientResponse(Long balance, Long user_id) {}
+    record TransactionClientRequest(BigDecimal amount, Long user_id){}
+    record TransactionClientResponse(String wallet_transaction_id, BigDecimal amount, Long user_id){}
 }

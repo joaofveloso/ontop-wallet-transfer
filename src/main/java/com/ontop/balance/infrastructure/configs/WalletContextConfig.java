@@ -24,7 +24,7 @@ public class WalletContextConfig {
     }
 
     @Bean
-    TransactionFacade transactionFacade(Transaction transaction) {
-        return new TransactionFacade(transaction);
+    TransactionFacade transactionFacade(Transaction transaction, Payment payment, Wallet wallet) {
+        return new TransactionFacade(transaction, payment, wallet);
     }
 }
