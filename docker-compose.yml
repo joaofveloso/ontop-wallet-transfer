@@ -41,7 +41,7 @@ services:
   ontop:
     image: openjdk:17
     container_name: ontop
-    command: ["java", "-jar", "/app.jar"]
+    command: ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "/app.jar"]
     volumes:
       - ./target/ontop-0.0.1-SNAPSHOT.jar:/app.jar
     ports:

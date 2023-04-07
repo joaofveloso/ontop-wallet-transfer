@@ -21,6 +21,11 @@ public record RecipientData(
         }
     }
 
+    public boolean isOwnedBy(Long clientId) {
+        return Objects.equals(this.clientId, clientId);
+    }
+
+
     public BigDecimal applyFee(BigDecimal amount) {
         AmountValidation.moneyAmountValidation(amount);
         return amount.multiply(BigDecimal.ONE.subtract(fee));

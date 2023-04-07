@@ -4,5 +4,5 @@ import com.ontop.balance.core.model.commands.TransferMoneyCommand;
 
 public interface TransferMoney {
 
-    String handler(TransferMoneyCommand transferMoneyCommand);
+    String handler(TransferMoneyCommand command);
 }

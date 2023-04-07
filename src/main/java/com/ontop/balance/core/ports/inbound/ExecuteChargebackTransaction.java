@@ -1,8 +1,8 @@
 package com.ontop.balance.core.ports.inbound;
 
-import com.ontop.kernels.WalletChargebackMessage;
+import com.ontop.kernels.ChargebackMessage;
 
 public interface ExecuteChargebackTransaction {
 
-    void handle(WalletChargebackMessage message);
+    void handle(ChargebackMessage message);
 }

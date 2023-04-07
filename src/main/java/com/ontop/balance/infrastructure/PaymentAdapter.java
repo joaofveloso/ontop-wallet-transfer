@@ -14,18 +14,14 @@ import com.ontop.balance.infrastructure.entity.TransactionEntity;
 import com.ontop.balance.infrastructure.entity.TransactionEntity.TransactionItem;
 import com.ontop.balance.infrastructure.repositories.TransactionRepository;
 import com.ontop.kernels.PaymentMessage;
-import java.lang.Thread.UncaughtExceptionHandler;
+import feign.FeignException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
@@ -55,51 +51,47 @@ public class PaymentAdapter implements Payment {
     private final KafkaTemplate<String, PaymentMessage> paymentProducer;
     private final PaymentClient paymentClient;
     private final TransactionRepository transactionRepository;
+    private final WalletAdapter walletAdapter;
 
     @Override
-    public void prepareTransfer(BigDecimal amount, RecipientData recipientData, String transactionId,
-            Consumer<String> stringConsumer) {
-
+    public TransactionStatus prepareTransfer(
+            BigDecimal amount, RecipientData recipientData, String transactionId) {
         ProducerRecord<String, PaymentMessage> paymentRecord = new ProducerRecord<>(this.topic,
                 transactionId, new PaymentMessage(recipientData.clientId(), recipientData.id(),
                 recipientData.name(), recipientData.routingNumber(),
                 recipientData.nationalIdentification(), recipientData.accountNumber(), amount,transactionId));
         paymentRecord.headers().add("x-transaction-id", transactionId.getBytes(StandardCharsets.UTF_8));
         try {
-            var send = this.paymentProducer.send(paymentRecord);
-            send.addCallback(success -> {
-                stringConsumer.accept(this.getClass().getSimpleName());
-            }, ex -> {});
-            send.get();
-            //TODO: Deal with other exceptions
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
+            this.paymentProducer.send(paymentRecord).get();
+            return TransactionStatus.PENDING;
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Transaction PrepareTransfer >>> {}: {}", transactionId, e.getMessage());
+            return TransactionStatus.FAILED;
         }
     }
 
     @Override
-    public void transfer(PaymentMessage message, BiConsumer<String, TransactionStatus> consumer) {
-        consumer.accept(this.getClass().getSimpleName(),TransactionStatus.IN_PROGRESS);
-
+    public TransactionStatus transfer(PaymentMessage message) {
         CompletableFuture<TransactionStatus> future = new CompletableFuture<>();
         new Thread(walletIsCompleted(message.getTransactionId(), future)).start();
-
         try {
             TransactionStatus transactionStatus = future.get();
             if (TransactionStatus.COMPLETED.equals(transactionStatus)) {
                 this.paymentClient.executePayment(toPaymentClientRequest(message));
-                consumer.accept(this.getClass().getSimpleName(),TransactionStatus.COMPLETED);
+                return TransactionStatus.COMPLETED;
             } else {
                 throw new InterruptedException();
             }
         } catch (InterruptedException | ExecutionException e) {
-            log.error("Transaction >>> {}: {}", message.getTransactionId(), e.getMessage());
-            consumer.accept(this.getClass().getSimpleName(),TransactionStatus.CANCELED);
+            log.warn("Transaction Transfer >>> {}: {}", message.getTransactionId(), e.getMessage());
+            return TransactionStatus.CANCELED;
+        } catch (FeignException e) {
+            log.error("Transaction Transfer >>> {}: {}", message.getTransactionId(), e.getMessage());
+            return TransactionStatus.FAILED;
         }
     }
 
+    // TODO: Transfer it to a Object Value
     private Runnable walletIsCompleted(String transactionId, CompletableFuture<TransactionStatus> future) {
         long timeout = 5000;
         long start = System.currentTimeMillis();
@@ -111,14 +103,14 @@ public class PaymentAdapter implements Payment {
                         .orElse(Collections.emptyList());
 
                 Optional<TransactionItem> walletItem = transactionItems.stream()
-                        .filter(item -> WalletAdapter.class.getSimpleName().equals(item.getTargetSystem()))
+                        .filter(item -> WalletAdapter.class.getSimpleName().equals(item.getTargetSystem()) &&
+                                (TransactionStatus.COMPLETED.toString().equals(item.getStatus()) ||
+                                        TransactionStatus.FAILED.toString().equals(item.getStatus())))
                         .findFirst();
 
                 if (walletItem.isPresent()) {
                     String status = walletItem.get().getStatus();
-                    if (TransactionStatus.COMPLETED.toString().equals(status) || TransactionStatus.FAILED.toString().equals(status)) {
-                        buffer.append(status);
-                    }
+                    buffer.append(status);
                 }
 
                 try {
@@ -142,11 +134,8 @@ public class PaymentAdapter implements Payment {
         SourceInformation sourceInformation = new SourceInformation(this.sourceName);
         AccountData sourceAccountData = new AccountData(this.accountNumber, this.currency, this.routingNumber);
         SourceData sourceData = new SourceData(SourceType.COMPANY, sourceInformation, sourceAccountData);
-
         AccountData destinationAccountData = new AccountData(paymentMessage.getAccountNumber(), this.currency, paymentMessage.getRoutingNumber());
         DestinationData destinationData = new DestinationData(paymentMessage.getName(), destinationAccountData);
-
         return new PaymentClientRequest(sourceData, destinationData, paymentMessage.getAmount());
     }
-
 }

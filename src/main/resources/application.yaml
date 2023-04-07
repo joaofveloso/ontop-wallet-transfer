@@ -7,7 +7,7 @@ springdoc:
 spring:
   data:
     mongodb:
-      uri: mongodb://myuser:mypass@mongodb:27017
+      uri: mongodb://myuser:mypass@mongodb:27017/?w=majority
       database: ontop
       username: myuser
       password: mypass

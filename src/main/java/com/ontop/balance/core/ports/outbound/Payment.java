@@ -10,7 +10,6 @@ import java.util.function.Consumer;
 
 public interface Payment {
 
-    void prepareTransfer(BigDecimal amount, RecipientData recipientData, String transactionId,
-            Consumer<String> stringConsumer);
-    void transfer(PaymentMessage message, BiConsumer<String, TransactionStatus> consumer);
+    TransactionStatus prepareTransfer(BigDecimal amount, RecipientData recipientData, String transactionId);
+    TransactionStatus transfer(PaymentMessage message);
 }

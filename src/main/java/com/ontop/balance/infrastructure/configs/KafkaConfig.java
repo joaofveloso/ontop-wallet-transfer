@@ -1,5 +1,6 @@
 package com.ontop.balance.infrastructure.configs;
 
+import com.ontop.kernels.ChargebackMessage;
 import com.ontop.kernels.ParentMessage;
 import com.ontop.kernels.PaymentMessage;
 import com.ontop.kernels.WalletMessage;
@@ -42,6 +43,13 @@ public class KafkaConfig {
     @Bean("paymentProducer")
     public KafkaTemplate<String, PaymentMessage> paymentProducer() {
         DefaultKafkaProducerFactory<String, PaymentMessage> factory = new DefaultKafkaProducerFactory<>(
+                producerConfig(), new StringSerializer(), new JsonSerializer<>());
+        return new KafkaTemplate<>(factory);
+    }
+
+    @Bean("chargebackProducer")
+    public KafkaTemplate<String, ChargebackMessage> chargebackProducer() {
+        DefaultKafkaProducerFactory<String, ChargebackMessage> factory = new DefaultKafkaProducerFactory<>(
                 producerConfig(), new StringSerializer(), new JsonSerializer<>());
         return new KafkaTemplate<>(factory);
     }

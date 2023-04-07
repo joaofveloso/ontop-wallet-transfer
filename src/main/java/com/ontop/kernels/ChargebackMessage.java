@@ -1,6 +1,5 @@
 package com.ontop.kernels;
 
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WalletChargebackMessage implements ParentMessage {
+public class ChargebackMessage implements ParentMessage {
 
     private String transactionId;
 }

@@ -1,5 +1,6 @@
 package com.ontop.balance.infrastructure.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,14 +23,16 @@ public class TransactionEntity {
     private String recipientId;
     private String recipientName;
     private LocalDateTime createdAt;
+    private BigDecimal amount;
 
     private List<TransactionItem> steps;
 
-    public TransactionEntity(String id, Long clientId, String recipientId, String recipientName) {
+    public TransactionEntity(String id, Long clientId, String recipientId, String recipientName, BigDecimal amount) {
         this.id = id;
         this.clientId = clientId;
         this.recipientId = recipientId;
         this.recipientName = recipientName;
+        this.amount = amount;
         this.createdAt = LocalDateTime.now();
         this.steps = new ArrayList<>();
     }

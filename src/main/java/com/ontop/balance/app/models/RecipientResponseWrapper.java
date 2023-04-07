@@ -22,7 +22,7 @@ public class RecipientResponseWrapper extends RepresentationModel<RecipientRespo
         if (pagination.page() > 0) {
             add(linkTo(methodOn(RecipientController.class).obtainRecipients(null, pagination.page() - 1, pagination.pageSize())).withRel("previous"));
         }
-        if (pagination.page() < pagination.totalPages()) {
+        if (pagination.page() < pagination.totalPages()-1) {
             add(linkTo(methodOn(RecipientController.class).obtainRecipients(null, pagination.page() + 1, pagination.pageSize())).withRel("next"));
         }
     }
