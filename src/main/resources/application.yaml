@@ -16,6 +16,11 @@ spring:
   banner:
     location: classpath:banner.txt
 
+logging:
+  level:
+    com.ontop.balance.*: DEBUG
+    feign.*: DEBUG
+
 core:
   ontop:
     fee: 0.1
