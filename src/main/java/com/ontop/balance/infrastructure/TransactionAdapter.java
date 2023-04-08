@@ -1,22 +1,24 @@
 package com.ontop.balance.infrastructure;
 
+import com.ontop.balance.core.model.PaginatedWrapper;
+import com.ontop.balance.core.model.PaginatedWrapper.PaginatedData;
 import com.ontop.balance.core.model.RecipientData;
 import com.ontop.balance.core.model.TransactionData;
 import com.ontop.balance.core.model.TransactionData.TransactionItemData;
 import com.ontop.balance.core.model.TransactionData.TransactionStatus;
 import com.ontop.balance.core.model.commands.TransferMoneyCommand;
+import com.ontop.balance.core.model.queries.ObtainTransactionClientQuery;
 import com.ontop.balance.core.ports.outbound.Transaction;
 import com.ontop.balance.infrastructure.entity.TransactionEntity;
 import com.ontop.balance.infrastructure.entity.TransactionEntity.TransactionItem;
 import com.ontop.balance.infrastructure.repositories.TransactionRepository;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -46,5 +48,13 @@ public class TransactionAdapter implements Transaction {
         TransactionEntity transactionEntity = this.transactionRepository.findById(transactionId).orElseThrow(); // TODO: handle exception
         transactionEntity.getSteps().add(new TransactionItem(targetSystem, status.toString()));
         this.transactionRepository.save(transactionEntity);
+    }
+
+    @Override
+    public PaginatedWrapper<TransactionData> findByClient(ObtainTransactionClientQuery query) {
+        Pageable pageable = PageRequest.of(query.page(), query.pageSize());
+        Page<TransactionEntity> paginatedData = this.transactionRepository.findDocumentsByCreateDate(query.clientId(), query.date(), pageable);
+        List<TransactionData> transactionData = paginatedData.map(this::toTransactionData).stream().toList();
+        return new PaginatedWrapper<>(transactionData, new PaginatedData(query.page(), paginatedData.getSize(), paginatedData.getTotalPages()));
     }
 }

@@ -1,11 +1,14 @@
 package com.ontop.balance.core;
 
+import com.ontop.balance.core.model.PaginatedWrapper;
 import com.ontop.balance.core.model.TransactionData;
 import com.ontop.balance.core.model.TransactionData.TransactionStatus;
 import com.ontop.balance.core.model.queries.ObtainTransactionByIdQuery;
+import com.ontop.balance.core.model.queries.ObtainTransactionClientQuery;
 import com.ontop.balance.core.ports.inbound.ExecuteChargebackTransaction;
 import com.ontop.balance.core.ports.inbound.ExecutePaymentTransaction;
 import com.ontop.balance.core.ports.inbound.ExecuteWalletTransaction;
+import com.ontop.balance.core.ports.inbound.ObtainTransactionByClient;
 import com.ontop.balance.core.ports.inbound.ObtainTransactionsById;
 import com.ontop.balance.core.ports.outbound.Chargeback;
 import com.ontop.balance.core.ports.outbound.Payment;
@@ -20,7 +23,8 @@ import com.ontop.kernels.WalletMessage;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class TransactionFacade implements ObtainTransactionsById, ExecuteWalletTransaction, ExecutePaymentTransaction, ExecuteChargebackTransaction {
+public class TransactionFacade implements ObtainTransactionsById, ObtainTransactionByClient,
+        ExecuteWalletTransaction, ExecutePaymentTransaction, ExecuteChargebackTransaction {
 
     private final Transaction transaction;
     private final Payment payment;
@@ -61,5 +65,10 @@ public class TransactionFacade implements ObtainTransactionsById, ExecuteWalletT
         if (!TransactionStatus.COMPLETED.equals(status)) {
             //TODO: SOmething really bad happened
         }
+    }
+
+    @Override
+    public PaginatedWrapper<TransactionData> handler(ObtainTransactionClientQuery query) {
+        return this.transaction.findByClient(query);
     }
 }

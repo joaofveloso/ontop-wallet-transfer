@@ -1,6 +1,7 @@
 package com.ontop.balance.app.controllers;
 
 import com.ontop.balance.app.models.TransactionItemResponse;
+import com.ontop.balance.app.models.TransactionResponseWrapper;
 import com.ontop.balance.app.models.TransferMoneyRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
 import javax.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping("/transactions")
 @SecurityScheme(name = HttpHeaders.AUTHORIZATION, type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")
@@ -52,4 +55,11 @@ public interface TransferMoneyControllerDoc {
             @Parameter(hidden = true) @RequestHeader("X-Client-Id") Long clientId,
             @PathVariable("id") String transaction);
 
+    @GetMapping
+    @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
+    ResponseEntity<TransactionResponseWrapper> obtainTransactionsByClient(
+            @Parameter(hidden = true) @RequestHeader("X-Client-Id") Long clientId,
+            @RequestParam(required = false) LocalDate dateToFilter,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size);
 }

@@ -5,6 +5,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.ontop.balance.app.controllers.RecipientController;
+import java.util.Dictionary;
 import lombok.Getter;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;

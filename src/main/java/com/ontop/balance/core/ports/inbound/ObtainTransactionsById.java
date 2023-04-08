@@ -6,4 +6,5 @@ import com.ontop.balance.core.model.queries.ObtainTransactionByIdQuery;
 public interface ObtainTransactionsById {
 
     TransactionData handler(ObtainTransactionByIdQuery query);
+
 }

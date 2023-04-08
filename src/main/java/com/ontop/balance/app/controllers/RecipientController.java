@@ -15,13 +15,11 @@ import com.ontop.balance.core.model.queries.ObtainRecipientByIdQuery;
 import com.ontop.balance.core.ports.inbound.CreateRecipient;
 import com.ontop.balance.core.ports.inbound.ObtainRecipientByClient;
 import com.ontop.balance.core.ports.inbound.ObtainRecipientById;
-import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,7 +30,8 @@ public class RecipientController implements RecipientControllerDoc {
     private final ObtainRecipientById obtainRecipientById;
 
     @Override
-    public ResponseEntity<Void> createRecipient(Long clientId, CreateRecipientAccountRequest request) {
+    public ResponseEntity<Void> createRecipient(Long clientId,
+            CreateRecipientAccountRequest request) {
         String key = this.createRecipient.handler(
                 new CreateRecipientCommand(clientId, request.name() + " " + request.surname(),
                         request.routingNumber(), request.identificationNumber(),
@@ -42,10 +41,10 @@ public class RecipientController implements RecipientControllerDoc {
     }
 
     @Override
-    public ResponseEntity<RecipientResponseWrapper> obtainRecipients(
-            Long clientId, int page, int size) {
-        RecipientResponse recipientResponse = toRecipientResponse(
-                obtainRecipientByClient.handler(new ObtainRecipientByClientQuery(clientId, page, size)));
+    public ResponseEntity<RecipientResponseWrapper> obtainRecipients(Long clientId, int page,
+            int size) {
+        RecipientResponse recipientResponse = toRecipientResponse(obtainRecipientByClient.handler(
+                new ObtainRecipientByClientQuery(clientId, page, size)));
         RecipientResponseWrapper recipientResponseWrapper = new RecipientResponseWrapper(
                 recipientResponse);
         return ResponseEntity.ok(recipientResponseWrapper);
@@ -53,10 +52,11 @@ public class RecipientController implements RecipientControllerDoc {
 
     @Override
     public ResponseEntity<RecipientItemWrapper> obtainRecipientById(Long clientId, String id) {
-        RecipientData handler = this.obtainRecipientById.handler(new ObtainRecipientByIdQuery(id, clientId));
+        RecipientData handler = this.obtainRecipientById.handler(
+                new ObtainRecipientByIdQuery(id, clientId));
         RecipientItemWrapper recipientItemWrapper = new RecipientItemWrapper(
-                new RecipientResponseItem(handler.id(), handler.name(),
-                        handler.routingNumber(), handler.accountNumber()));
+                new RecipientResponseItem(handler.id(), handler.name(), handler.routingNumber(),
+                        handler.accountNumber()));
         return ResponseEntity.ok(recipientItemWrapper);
     }
 }
