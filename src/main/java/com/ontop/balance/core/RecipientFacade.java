@@ -3,6 +3,7 @@ package com.ontop.balance.core;
 import com.ontop.balance.core.model.PaginatedWrapper;
 import com.ontop.balance.core.model.RecipientData;
 import com.ontop.balance.core.model.commands.CreateRecipientCommand;
+import com.ontop.balance.core.model.exceptions.RecipientNotFoundException;
 import com.ontop.balance.core.model.queries.ObtainRecipientByClientQuery;
 import com.ontop.balance.core.model.queries.ObtainRecipientByIdQuery;
 import com.ontop.balance.core.ports.inbound.CreateRecipient;
@@ -32,7 +33,8 @@ public class RecipientFacade implements CreateRecipient, ObtainRecipientByClient
 
     @Override
     public RecipientData handler(ObtainRecipientByIdQuery query) {
-        RecipientData recipientData = this.recipient.findRecipientById(query).orElseThrow();//TODO: add exceptions
+        RecipientData recipientData = this.recipient.findRecipientById(query).orElseThrow(
+                RecipientNotFoundException::new);
         recipientData.validateOwnership(query.clientId());
         return recipientData;
     }

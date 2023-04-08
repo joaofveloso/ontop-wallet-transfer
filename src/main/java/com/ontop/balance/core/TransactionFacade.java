@@ -3,6 +3,7 @@ package com.ontop.balance.core;
 import com.ontop.balance.core.model.PaginatedWrapper;
 import com.ontop.balance.core.model.TransactionData;
 import com.ontop.balance.core.model.TransactionData.TransactionStatus;
+import com.ontop.balance.core.model.exceptions.TransactionNotFoundException;
 import com.ontop.balance.core.model.queries.ObtainTransactionByIdQuery;
 import com.ontop.balance.core.model.queries.ObtainTransactionClientQuery;
 import com.ontop.balance.core.ports.inbound.ExecuteChargebackTransaction;
@@ -33,7 +34,8 @@ public class TransactionFacade implements ObtainTransactionsById, ObtainTransact
 
     @Override
     public TransactionData handler(ObtainTransactionByIdQuery query) {
-        TransactionData transactionsById = transaction.getTransactionsById(query.id()).orElseThrow(); //TODO: throw exception
+        TransactionData transactionsById = transaction.getTransactionsById(query.id()).orElseThrow(
+                TransactionNotFoundException::new);
         transactionsById.validateOwnership(query.clientId());
         return transactionsById;
     }
