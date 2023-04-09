@@ -59,7 +59,7 @@ public class TransactionAdapter implements Transaction {
     @Override
     public PaginatedWrapper<TransactionData> findByClient(ObtainTransactionClientQuery query) {
         Pageable pageable = PageRequest.of(query.page(), query.pageSize());
-        Page<TransactionEntity> paginatedData = this.transactionRepository.findDocumentsByCreateDate(
+        Page<TransactionEntity> paginatedData = this.transactionRepository.findByClientIdAndCreatedAtBetween(
                 query.clientId(), query.date(), pageable);
         List<TransactionData> transactionData = paginatedData.map(this::toTransactionData).stream()
                 .toList();

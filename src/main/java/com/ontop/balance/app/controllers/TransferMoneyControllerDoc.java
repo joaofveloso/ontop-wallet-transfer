@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import javax.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,7 +58,7 @@ public interface TransferMoneyControllerDoc {
             pagination information as well as metadata about the request.""")
     ResponseEntity<TransactionResponseWrapper> obtainTransactionsByClient(
             @Parameter(hidden = true) @RequestHeader("X-Client-Id") Long clientId,
-            @RequestParam(required = false) LocalDate dateToFilter,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateToFilter,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size);
 }
