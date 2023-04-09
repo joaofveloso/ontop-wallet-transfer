@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WalletMessage implements ParentMessage {
+
     private Long clientId;
     private BigDecimal amount;
     private String transactionId;

@@ -1,8 +1,18 @@
 package com.ontop.balance.app.models;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
-public record RecipientResponse(List<RecipientResponseItem> data, PaginationResponse pagination) {
+@Schema(description = "Response object containing a list of recipients and pagination information")
+public record RecipientResponse(
+        @Schema(description = "The list of recipients") List<RecipientResponseItem> data,
+        @Schema(description = "The pagination information") PaginationResponse pagination) {
 
-    public record RecipientResponseItem(String id, String name, String routingNumber, String accountNumber) {}
+    @Schema(description = "A recipient item in the response list")
+    public record RecipientResponseItem(@Schema(description = "The ID of the recipient") String id,
+                                        @Schema(description = "The name of the recipient") String name,
+                                        @Schema(description = "The routing number of the recipient's bank") String routingNumber,
+                                        @Schema(description = "The account number of the recipient") String accountNumber) {
+
+    }
 }

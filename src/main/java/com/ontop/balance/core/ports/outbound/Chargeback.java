@@ -6,5 +6,6 @@ import com.ontop.kernels.ChargebackMessage;
 public interface Chargeback {
 
     TransactionStatus prepareChargeback(String transactionId);
+
     TransactionStatus chargeback(ChargebackMessage message);
 }

@@ -32,20 +32,26 @@ public class TransactionAdapter implements Transaction {
     }
 
     private TransactionData toTransactionData(TransactionEntity entity) {
-        List<TransactionItemData> transactionItemData = entity.getSteps().stream().map(step -> new TransactionItemData(step.getCreatedAt(), step.getTargetSystem(), TransactionStatus.valueOf(step.getStatus()))).toList();
-        return new TransactionData(entity.getId(), entity.getClientId(), entity.getCreatedAt(), transactionItemData);
+        List<TransactionItemData> transactionItemData = entity.getSteps().stream()
+                .map(step -> new TransactionItemData(step.getCreatedAt(), step.getTargetSystem(),
+                        TransactionStatus.valueOf(step.getStatus()))).toList();
+        return new TransactionData(entity.getId(), entity.getClientId(), entity.getCreatedAt(),
+                transactionItemData);
     }
 
     @Override
-    public void starNewTransaction(String transactionId, TransferMoneyCommand command, RecipientData recipientData) {
+    public void starNewTransaction(String transactionId, TransferMoneyCommand command,
+            RecipientData recipientData) {
         TransactionEntity transactionEntity = new TransactionEntity(transactionId,
                 command.clientId(), command.recipientId(), recipientData.name(), command.amount());
         this.transactionRepository.save(transactionEntity);
     }
 
     @Override
-    public void addStepToTransaction(String transactionId, String targetSystem, TransactionStatus status) {
-        TransactionEntity transactionEntity = this.transactionRepository.findById(transactionId).orElseThrow(); // TODO: handle exception
+    public void addStepToTransaction(String transactionId, String targetSystem,
+            TransactionStatus status) {
+        TransactionEntity transactionEntity = this.transactionRepository.findById(transactionId)
+                .orElseThrow(); // TODO: handle exception
         transactionEntity.getSteps().add(new TransactionItem(targetSystem, status.toString()));
         this.transactionRepository.save(transactionEntity);
     }
@@ -53,8 +59,12 @@ public class TransactionAdapter implements Transaction {
     @Override
     public PaginatedWrapper<TransactionData> findByClient(ObtainTransactionClientQuery query) {
         Pageable pageable = PageRequest.of(query.page(), query.pageSize());
-        Page<TransactionEntity> paginatedData = this.transactionRepository.findDocumentsByCreateDate(query.clientId(), query.date(), pageable);
-        List<TransactionData> transactionData = paginatedData.map(this::toTransactionData).stream().toList();
-        return new PaginatedWrapper<>(transactionData, new PaginatedData(query.page(), paginatedData.getSize(), paginatedData.getTotalPages()));
+        Page<TransactionEntity> paginatedData = this.transactionRepository.findDocumentsByCreateDate(
+                query.clientId(), query.date(), pageable);
+        List<TransactionData> transactionData = paginatedData.map(this::toTransactionData).stream()
+                .toList();
+        return new PaginatedWrapper<>(transactionData,
+                new PaginatedData(query.page(), paginatedData.getSize(),
+                        paginatedData.getTotalPages()));
     }
 }

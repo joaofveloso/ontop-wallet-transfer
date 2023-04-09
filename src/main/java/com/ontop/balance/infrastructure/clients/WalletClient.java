@@ -18,7 +18,16 @@ public interface WalletClient {
     @RequestMapping(method = RequestMethod.POST, value = "/wallets/transactions", consumes = "application/json")
     TransactionClientResponse executeTransaction(@RequestBody TransactionClientRequest request);
 
-    record BalanceClientResponse(Long balance, Long user_id) {}
-    record TransactionClientRequest(BigDecimal amount, Long user_id){}
-    record TransactionClientResponse(String wallet_transaction_id, BigDecimal amount, Long user_id){}
+    record BalanceClientResponse(Long balance, Long user_id) {
+
+    }
+
+    record TransactionClientRequest(BigDecimal amount, Long user_id) {
+
+    }
+
+    record TransactionClientResponse(String wallet_transaction_id, BigDecimal amount,
+                                     Long user_id) {
+
+    }
 }

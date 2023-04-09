@@ -49,7 +49,7 @@ public class TokenFilter implements Filter {
         String token = mutableHttpRequest.getHeader(HttpHeaders.AUTHORIZATION);
         if (token != null && token.startsWith("Bearer ")) {
             String[] tokenParts = token.split(" ");
-            mutableHttpRequest.putHeader( "X-Client-Id", getSubject(tokenParts[1]));
+            mutableHttpRequest.putHeader("X-Client-Id", getSubject(tokenParts[1]));
         }
         chain.doFilter(mutableHttpRequest, response);
     }
@@ -63,11 +63,6 @@ public class TokenFilter implements Filter {
         JwtParser parser = Jwts.parserBuilder().setSigningKey(getSignInKey()).build();
         Claims claims = parser.parseClaimsJws(token).getBody();
         return claims.getSubject();
-    }
-
-    @Override
-    public void destroy() {
-        Filter.super.destroy();
     }
 
     private static class MutableHttpRequest extends HttpServletRequestWrapper {
@@ -94,7 +89,8 @@ public class TokenFilter implements Filter {
                 headerValues.add(customHeaderValue);
             }
 
-            Enumeration<String> originalHeaders = ((HttpServletRequest) getRequest()).getHeaders(key);
+            Enumeration<String> originalHeaders = ((HttpServletRequest) getRequest()).getHeaders(
+                    key);
             while (originalHeaders.hasMoreElements()) {
                 headerValues.add(originalHeaders.nextElement());
             }
@@ -115,8 +111,9 @@ public class TokenFilter implements Filter {
                     .collect(Collectors.toSet());
             return Collections.enumeration(set);
         }
-        private static Supplier<Optional<? extends String>> getHeaderFromOriginalWrapper(
-                String key, ServletRequest request) {
+
+        private static Supplier<Optional<? extends String>> getHeaderFromOriginalWrapper(String key,
+                ServletRequest request) {
             return () -> Optional.ofNullable(((HttpServletRequest) request).getHeader(key));
         }
 

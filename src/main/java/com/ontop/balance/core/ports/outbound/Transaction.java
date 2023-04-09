@@ -12,7 +12,8 @@ public interface Transaction {
 
     Optional<TransactionData> getTransactionsById(String id);
 
-    void starNewTransaction(String transactionId, TransferMoneyCommand command, RecipientData recipientData);
+    void starNewTransaction(String transactionId, TransferMoneyCommand command,
+            RecipientData recipientData);
 
     void addStepToTransaction(String transactionId, String targetSystem, TransactionStatus status);
 

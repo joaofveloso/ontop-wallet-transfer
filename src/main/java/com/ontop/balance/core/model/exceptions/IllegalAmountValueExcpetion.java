@@ -1,6 +1,6 @@
 package com.ontop.balance.core.model.exceptions;
 
-public class IllegalAmountValueExcpetion extends RuntimeException{
+public class IllegalAmountValueExcpetion extends RuntimeException {
 
     private IllegalAmountValueExcpetion(String message) {
         super(message);

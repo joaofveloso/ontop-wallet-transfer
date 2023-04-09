@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentMessage implements ParentMessage {
+
     private Long clientId;
     private String recipientId;
     private String name;

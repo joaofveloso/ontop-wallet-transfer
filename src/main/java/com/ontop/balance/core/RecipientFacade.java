@@ -33,8 +33,8 @@ public class RecipientFacade implements CreateRecipient, ObtainRecipientByClient
 
     @Override
     public RecipientData handler(ObtainRecipientByIdQuery query) {
-        RecipientData recipientData = this.recipient.findRecipientById(query).orElseThrow(
-                RecipientNotFoundException::new);
+        RecipientData recipientData = this.recipient.findRecipientById(query)
+                .orElseThrow(RecipientNotFoundException::new);
         recipientData.validateOwnership(query.clientId());
         return recipientData;
     }

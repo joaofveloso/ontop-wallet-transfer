@@ -12,11 +12,12 @@ public class ApplicationMapper {
 
     public static RecipientResponse toRecipientResponse(PaginatedWrapper<RecipientData> wrapper) {
 
-        List<RecipientResponseItem> recipients =
-                wrapper.data().stream().map(ApplicationMapper::toRecipientItem).toList();
+        List<RecipientResponseItem> recipients = wrapper.data().stream()
+                .map(ApplicationMapper::toRecipientItem).toList();
         PaginatedData pagination = wrapper.pagination();
-        return new RecipientResponse(recipients, new PaginationResponse(pagination.page(), pagination.pageSize(),
-                pagination.totalPages()));
+        return new RecipientResponse(recipients,
+                new PaginationResponse(pagination.page(), pagination.pageSize(),
+                        pagination.totalPages()));
     }
 
     private static RecipientResponseItem toRecipientItem(RecipientData recipientData) {

@@ -7,7 +7,11 @@ import java.util.Objects;
 
 public record TransactionData(String transactionId, Long clientId, LocalDateTime createdAt,
                               List<TransactionItemData> steps) {
-    public record TransactionItemData(LocalDateTime createdAt, String targetSystem, TransactionStatus status){}
+
+    public record TransactionItemData(LocalDateTime createdAt, String targetSystem,
+                                      TransactionStatus status) {
+
+    }
 
     public void validateOwnership(Long clientId) {
         if (!Objects.equals(this.clientId, clientId)) {
@@ -16,11 +20,8 @@ public record TransactionData(String transactionId, Long clientId, LocalDateTime
     }
 
     public enum TransactionStatus {
-        PENDING("Pending"),
-        IN_PROGRESS("In Progress"),
-        COMPLETED("Completed"),
-        FAILED("Failed"),
-        CANCELED("Canceled");
+        PENDING("Pending"), IN_PROGRESS("In Progress"), COMPLETED("Completed"), FAILED(
+                "Failed"), CANCELED("Canceled");
 
         private final String status;
 

@@ -19,7 +19,6 @@ import com.ontop.balance.core.model.exceptions.InsufficientBalanceException;
 import com.ontop.balance.core.model.exceptions.InvalidFeeException;
 import com.ontop.balance.core.model.exceptions.OwnershipValidationException;
 import com.ontop.balance.core.model.exceptions.RecipientNotFoundException;
-import com.ontop.balance.core.model.exceptions.UnauthorizedAccessToResourceException;
 import com.ontop.balance.core.model.exceptions.WalletNotFoundException;
 import com.ontop.balance.core.model.queries.ObtainRecipientByIdQuery;
 import com.ontop.balance.core.ports.outbound.Payment;
@@ -34,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-class TransferMoneyFacadeTest extends BaseTestCase{
+class TransferMoneyFacadeTest extends BaseTestCase {
 
     @Mock
     private Recipient recipient;
@@ -49,22 +48,23 @@ class TransferMoneyFacadeTest extends BaseTestCase{
 
     @Test
     @DisplayName("""
-        GIVEN a valid money transfer request,
-         WHEN the handler is invoked,
-         THEN the wallet amount must be withdrawn, and payment must be executed with amount deducted
-         by the fee""")
+            GIVEN a valid money transfer request,
+             WHEN the handler is invoked,
+             THEN the wallet amount must be withdrawn, and payment must be executed with amount deducted
+             by the fee""")
     void testHandlerSuccessfullTransaction() {
 
         String uuid = UUID.randomUUID().toString();
 
         var command = new TransferMoneyCommand(uuid, 1L, BigDecimal.valueOf(1_000));
-        var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
+        var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789",
+                BigDecimal.valueOf(0.1));
         var balanceData = new BalanceData(BigDecimal.valueOf(10_000));
-        var recipientQuery = new ObtainRecipientByIdQuery(
-                command.recipientId(), command.clientId());
+        var recipientQuery = new ObtainRecipientByIdQuery(command.recipientId(),
+                command.clientId());
 
-        doReturn(Optional.of(recipientData)).when(this.recipient).findRecipientById(any(
-                ObtainRecipientByIdQuery.class));
+        doReturn(Optional.of(recipientData)).when(this.recipient)
+                .findRecipientById(any(ObtainRecipientByIdQuery.class));
         doReturn(Optional.of(balanceData)).when(this.wallet).getBalance(anyLong());
         doNothing().when(this.wallet)
                 .prepareWithdraw(any(BigDecimal.class), any(RecipientData.class), anyString());
@@ -76,24 +76,24 @@ class TransferMoneyFacadeTest extends BaseTestCase{
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet).getBalance(eq(recipientData.clientId()));
         verify(this.wallet).prepareWithdraw(eq(command.amount()), eq(recipientData), anyString());
-        verify(this.payment).prepareTransfer(
-                eq(recipientData.applyFee(command.amount())), eq(recipientData), anyString());
+        verify(this.payment).prepareTransfer(eq(recipientData.applyFee(command.amount())),
+                eq(recipientData), anyString());
     }
 
     @Test
     @DisplayName("""
-        GIVEN a money transfer request with an invalid 'RecipientId',
-        WHEN the handler is invoked,
-        THEN a RecipientNotFoundException should be thrown""")
+            GIVEN a money transfer request with an invalid 'RecipientId',
+            WHEN the handler is invoked,
+            THEN a RecipientNotFoundException should be thrown""")
     void testHandlerRecipientNotFound() {
 
         String uuid = UUID.randomUUID().toString();
         var command = new TransferMoneyCommand(uuid, 1L, BigDecimal.valueOf(1_000));
-        var recipientQuery = new ObtainRecipientByIdQuery(
-                command.recipientId(), command.clientId());
+        var recipientQuery = new ObtainRecipientByIdQuery(command.recipientId(),
+                command.clientId());
 
-        doThrow(new RecipientNotFoundException()).when(this.recipient).findRecipientById(any(
-                ObtainRecipientByIdQuery.class));
+        doThrow(new RecipientNotFoundException()).when(this.recipient)
+                .findRecipientById(any(ObtainRecipientByIdQuery.class));
 
         assertThrows(RecipientNotFoundException.class,
                 () -> this.transferMoneyFacade.handler(command));
@@ -101,26 +101,27 @@ class TransferMoneyFacadeTest extends BaseTestCase{
         verify(this.recipient).findRecipientById(eq(recipientQuery));
 
         verify(this.wallet, never()).getBalance(anyLong());
-        verify(this.wallet, never()).prepareWithdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
-        verify(this.payment, never()).prepareTransfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+        verify(this.wallet, never()).prepareWithdraw(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
+        verify(this.payment, never()).prepareTransfer(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
     }
 
     @Test
     @DisplayName("""
-        GIVEN a money transfer request with a client without wallet,
-        WHEN the handler is invoked,
-        THEN a WalletNotFoundException should be thrown""")
+            GIVEN a money transfer request with a client without wallet,
+            WHEN the handler is invoked,
+            THEN a WalletNotFoundException should be thrown""")
     void testHandlerWalletNotFound() {
         String uuid = UUID.randomUUID().toString();
         var command = new TransferMoneyCommand(uuid, 1L, BigDecimal.valueOf(1_000));
-        var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
-        var recipientQuery = new ObtainRecipientByIdQuery(
-                command.recipientId(), command.clientId());
+        var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789",
+                BigDecimal.valueOf(0.1));
+        var recipientQuery = new ObtainRecipientByIdQuery(command.recipientId(),
+                command.clientId());
 
-        doReturn(Optional.of(recipientData)).when(this.recipient).findRecipientById(any(
-                ObtainRecipientByIdQuery.class));
+        doReturn(Optional.of(recipientData)).when(this.recipient)
+                .findRecipientById(any(ObtainRecipientByIdQuery.class));
         doThrow(new WalletNotFoundException()).when(this.wallet).getBalance(anyLong());
 
         assertThrows(WalletNotFoundException.class,
@@ -128,27 +129,28 @@ class TransferMoneyFacadeTest extends BaseTestCase{
 
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet).getBalance(eq(recipientData.clientId()));
-        verify(this.wallet, never()).prepareWithdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
-        verify(this.payment, never()).prepareTransfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+        verify(this.wallet, never()).prepareWithdraw(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
+        verify(this.payment, never()).prepareTransfer(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
     }
 
     @Test
     @DisplayName("""
-        GIVEN a money transfer request with amount hihger than balance,
-        WHEN the handler is invoked,
-        THEN a InsufficientBalanceException should be thrown""")
+            GIVEN a money transfer request with amount hihger than balance,
+            WHEN the handler is invoked,
+            THEN a InsufficientBalanceException should be thrown""")
     void testHandlerInsuffiecientBalance() {
         String uuid = UUID.randomUUID().toString();
         var command = new TransferMoneyCommand(uuid, 1L, BigDecimal.valueOf(5_000));
-        var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
+        var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789",
+                BigDecimal.valueOf(0.1));
         var balanceData = new BalanceData(BigDecimal.valueOf(1_000));
-        var recipientQuery = new ObtainRecipientByIdQuery(
-                command.recipientId(), command.clientId());
+        var recipientQuery = new ObtainRecipientByIdQuery(command.recipientId(),
+                command.clientId());
 
-        doReturn(Optional.of(recipientData)).when(this.recipient).findRecipientById(any(
-                ObtainRecipientByIdQuery.class));
+        doReturn(Optional.of(recipientData)).when(this.recipient)
+                .findRecipientById(any(ObtainRecipientByIdQuery.class));
         doReturn(Optional.of(balanceData)).when(this.wallet).getBalance(anyLong());
 
         assertThrows(InsufficientBalanceException.class,
@@ -156,101 +158,106 @@ class TransferMoneyFacadeTest extends BaseTestCase{
 
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet).getBalance(eq(recipientData.clientId()));
-        verify(this.wallet, never()).prepareWithdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
-        verify(this.payment, never()).prepareTransfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+        verify(this.wallet, never()).prepareWithdraw(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
+        verify(this.payment, never()).prepareTransfer(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
     }
 
     @Test
     @DisplayName("""
-        GIVEN an invalid fee value is define in the appication,
-        WHEN the Fee instance is created,
-        THEN an InvalidFeeException should be thrown""")
+            GIVEN an invalid fee value is define in the appication,
+            WHEN the Fee instance is created,
+            THEN an InvalidFeeException should be thrown""")
     void testHandlerInvalidFee() {
 
         String uuid = UUID.randomUUID().toString();
 
         assertThrows(InvalidFeeException.class,
-                () -> new RecipientData(uuid, 1L, "John Doe", "123", "456", "789", BigDecimal.valueOf(1.01)));
+                () -> new RecipientData(uuid, 1L, "John Doe", "123", "456", "789",
+                        BigDecimal.valueOf(1.01)));
     }
 
     @Test
     @DisplayName("""
-        GIVEN a money transfer request amout value defined as NULL,
-        WHEN the handler is invoked,
-        THEN a IllegalAmountValueExcpetion should be thrown""")
+            GIVEN a money transfer request amout value defined as NULL,
+            WHEN the handler is invoked,
+            THEN a IllegalAmountValueExcpetion should be thrown""")
     void testHandlerInvalidAmountForNullValue() {
 
         String uuid = UUID.randomUUID().toString();
         var command = new TransferMoneyCommand(uuid, 5L, null);
-        var recipientData = new RecipientData(uuid, 5L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
-        var recipientQuery = new ObtainRecipientByIdQuery(
-                command.recipientId(), command.clientId());
+        var recipientData = new RecipientData(uuid, 5L, "John Doe", "123", "456", "789",
+                BigDecimal.valueOf(0.1));
+        var recipientQuery = new ObtainRecipientByIdQuery(command.recipientId(),
+                command.clientId());
 
-        doReturn(Optional.of(recipientData)).when(this.recipient).findRecipientById(any(
-                ObtainRecipientByIdQuery.class));
+        doReturn(Optional.of(recipientData)).when(this.recipient)
+                .findRecipientById(any(ObtainRecipientByIdQuery.class));
 
         assertThrows(IllegalAmountValueExcpetion.class,
                 () -> this.transferMoneyFacade.handler(command));
 
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet, never()).getBalance(anyLong());
-        verify(this.wallet, never()).prepareWithdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
-        verify(this.payment, never()).prepareTransfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+        verify(this.wallet, never()).prepareWithdraw(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
+        verify(this.payment, never()).prepareTransfer(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
     }
 
     @Test
     @DisplayName("""
-        GIVEN a money transfer request amout value defined as negative,
-        WHEN the handler is invoked,
-        THEN a IllegalAmountValueExcpetion should be thrown""")
+            GIVEN a money transfer request amout value defined as negative,
+            WHEN the handler is invoked,
+            THEN a IllegalAmountValueExcpetion should be thrown""")
     void testHandlerInvalidAmountForNegativeValue() {
         String uuid = UUID.randomUUID().toString();
         var command = new TransferMoneyCommand(uuid, 5L, BigDecimal.valueOf(-100));
-        var recipientData = new RecipientData(uuid, 5L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
-        var recipientQuery = new ObtainRecipientByIdQuery(
-                command.recipientId(), command.clientId());
+        var recipientData = new RecipientData(uuid, 5L, "John Doe", "123", "456", "789",
+                BigDecimal.valueOf(0.1));
+        var recipientQuery = new ObtainRecipientByIdQuery(command.recipientId(),
+                command.clientId());
 
-        doReturn(Optional.of(recipientData)).when(this.recipient).findRecipientById(any(
-                ObtainRecipientByIdQuery.class));
+        doReturn(Optional.of(recipientData)).when(this.recipient)
+                .findRecipientById(any(ObtainRecipientByIdQuery.class));
 
         assertThrows(IllegalAmountValueExcpetion.class,
                 () -> this.transferMoneyFacade.handler(command));
 
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet, never()).getBalance(anyLong());
-        verify(this.wallet, never()).prepareWithdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
-        verify(this.payment, never()).prepareTransfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+        verify(this.wallet, never()).prepareWithdraw(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
+        verify(this.payment, never()).prepareTransfer(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
     }
+
     @Test
     @DisplayName("""
-        GIVEN a money transfer request to a recipient from another client,
-        WHEN the handler is invoked,
-        THEN a IllegalAmountValueExcpetion should be thrown""")
+            GIVEN a money transfer request to a recipient from another client,
+            WHEN the handler is invoked,
+            THEN a IllegalAmountValueExcpetion should be thrown""")
     void testHandlerUnauthorizedAccessToRecipient() {
 
         String uuid = UUID.randomUUID().toString();
         var command = new TransferMoneyCommand(uuid, 999L, BigDecimal.valueOf(1_000));
-        var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789", BigDecimal.valueOf(0.1));
-        var recipientQuery = new ObtainRecipientByIdQuery(
-                command.recipientId(), command.clientId());
+        var recipientData = new RecipientData(uuid, 1L, "John Doe", "123", "456", "789",
+                BigDecimal.valueOf(0.1));
+        var recipientQuery = new ObtainRecipientByIdQuery(command.recipientId(),
+                command.clientId());
 
-        doReturn(Optional.of(recipientData)).when(this.recipient).findRecipientById(any(
-                ObtainRecipientByIdQuery.class));
+        doReturn(Optional.of(recipientData)).when(this.recipient)
+                .findRecipientById(any(ObtainRecipientByIdQuery.class));
 
         assertThrows(OwnershipValidationException.class,
                 () -> this.transferMoneyFacade.handler(command));
 
         verify(this.recipient).findRecipientById(eq(recipientQuery));
         verify(this.wallet, never()).getBalance(anyLong());
-        verify(this.wallet, never()).prepareWithdraw(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
-        verify(this.payment, never()).prepareTransfer(
-                any(BigDecimal.class), any(RecipientData.class), anyString());
+        verify(this.wallet, never()).prepareWithdraw(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
+        verify(this.payment, never()).prepareTransfer(any(BigDecimal.class),
+                any(RecipientData.class), anyString());
     }
 }

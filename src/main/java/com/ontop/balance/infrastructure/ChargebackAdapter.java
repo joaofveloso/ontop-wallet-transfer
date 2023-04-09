@@ -7,17 +7,15 @@ import com.ontop.balance.infrastructure.clients.WalletClient.TransactionClientRe
 import com.ontop.balance.infrastructure.entity.TransactionEntity;
 import com.ontop.balance.infrastructure.repositories.TransactionRepository;
 import com.ontop.kernels.ChargebackMessage;
-import com.ontop.kernels.WalletMessage;
 import feign.FeignException;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Component
@@ -35,9 +33,10 @@ public class ChargebackAdapter implements Chargeback {
     @Override
     public TransactionStatus prepareChargeback(String transactionId) {
 
-        ProducerRecord<String, ChargebackMessage> changebackRecord =
-                new ProducerRecord<>(this.topic, transactionId, new ChargebackMessage(transactionId));
-        changebackRecord.headers().add("x-transaction-id", transactionId.getBytes(StandardCharsets.UTF_8));
+        ProducerRecord<String, ChargebackMessage> changebackRecord = new ProducerRecord<>(
+                this.topic, transactionId, new ChargebackMessage(transactionId));
+        changebackRecord.headers()
+                .add("x-transaction-id", transactionId.getBytes(StandardCharsets.UTF_8));
         try {
             this.chargebackProducer.send(changebackRecord).get();
             return TransactionStatus.PENDING;
@@ -52,10 +51,13 @@ public class ChargebackAdapter implements Chargeback {
         TransactionEntity transactionEntity = this.transactionRepository.findById(
                 message.getTransactionId()).orElseThrow();//TODO> handle exceptions
         try {
-            this.walletClient.executeTransaction(new TransactionClientRequest(transactionEntity.getAmount().negate(), transactionEntity.getClientId()));
+            this.walletClient.executeTransaction(
+                    new TransactionClientRequest(transactionEntity.getAmount().negate(),
+                            transactionEntity.getClientId()));
             return TransactionStatus.COMPLETED;
         } catch (FeignException e) {
-            log.error("Transaction Changeback >>> {}: {}", message.getTransactionId(), e.getMessage());
+            log.error("Transaction Changeback >>> {}: {}", message.getTransactionId(),
+                    e.getMessage());
             return TransactionStatus.FAILED;
         }
     }

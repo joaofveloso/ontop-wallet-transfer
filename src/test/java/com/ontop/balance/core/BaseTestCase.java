@@ -9,7 +9,7 @@ public abstract class BaseTestCase {
     void init_mocks() throws Exception {
 
         try (AutoCloseable closeable = MockitoAnnotations.openMocks(this)){
-
+            // Empty on purpose
         }
     }
 

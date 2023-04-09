@@ -28,35 +28,33 @@ public interface TransferMoneyControllerDoc {
 
     @PostMapping
     @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
-    @Operation(
-            summary = "Create a new money transfer request",
-            description = """
-                Creates a new money transfer request with the specified recipient ID and transfer 
-                amount. The request body should include a JSON object with the recipient ID and 
-                transfer amount, which will be used to create the new money transfer request. The 
-                server will generate a unique account ID for the new account, which will be 
-                returned in the response headers under the `Location` key. If the operation is 
-                successful, the response status code will be `200 OK`."""
-    )
+    @Operation(summary = "Create a new money transfer request", description = """
+            Creates a new money transfer request with the specified recipient ID and transfer\040
+            amount. The request body should include a JSON object with the recipient ID and\040
+            transfer amount, which will be used to create the new money transfer request. The\040
+            server will generate a unique account ID for the new account, which will be\040
+            returned in the response headers under the `Location` key. If the operation is\040
+            successful, the response status code will be `200 OK`.""")
     ResponseEntity<Void> createTransfer(
             @Parameter(hidden = true) @RequestHeader("X-Client-Id") Long clientId,
             @RequestBody @Valid TransferMoneyRequest request);
 
     @GetMapping("/{id}")
     @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
-    @Operation(
-            summary = "Retrieve transactions by ID",
-            description = """
-                Retrieves a transaction by the specified ID. If the transaction exists, 
-                the response status code will be `200 OK`. If the transaction does not exist, 
-                the response status code will be `404 Not Found`."""
-    )
+    @Operation(summary = "Retrieve transactions by ID", description = """
+            Retrieves a transaction by the specified ID. If the transaction exists,\040
+            the response status code will be `200 OK`. If the transaction does not exist,\040
+            the response status code will be `404 Not Found`.""")
     ResponseEntity<TransactionItemResponse> obtainTransactionsById(
             @Parameter(hidden = true) @RequestHeader("X-Client-Id") Long clientId,
             @PathVariable("id") String transaction);
 
     @GetMapping
     @SecurityRequirement(name = HttpHeaders.AUTHORIZATION)
+    @Operation(summary = "Obtain transactions by client", description = """
+            Retrieves a list of transactions associated with the authenticated client. Optionally,\040
+            you can filter by date using the `dateToFilter` parameter. The response includes\040
+            pagination information as well as metadata about the request.""")
     ResponseEntity<TransactionResponseWrapper> obtainTransactionsByClient(
             @Parameter(hidden = true) @RequestHeader("X-Client-Id") Long clientId,
             @RequestParam(required = false) LocalDate dateToFilter,

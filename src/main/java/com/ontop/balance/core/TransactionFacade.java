@@ -3,6 +3,7 @@ package com.ontop.balance.core;
 import com.ontop.balance.core.model.PaginatedWrapper;
 import com.ontop.balance.core.model.TransactionData;
 import com.ontop.balance.core.model.TransactionData.TransactionStatus;
+import com.ontop.balance.core.model.exceptions.ChargebackFailedException;
 import com.ontop.balance.core.model.exceptions.TransactionNotFoundException;
 import com.ontop.balance.core.model.queries.ObtainTransactionByIdQuery;
 import com.ontop.balance.core.model.queries.ObtainTransactionClientQuery;
@@ -22,7 +23,9 @@ import com.ontop.kernels.ChargebackMessage;
 import com.ontop.kernels.PaymentMessage;
 import com.ontop.kernels.WalletMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 public class TransactionFacade implements ObtainTransactionsById, ObtainTransactionByClient,
         ExecuteWalletTransaction, ExecutePaymentTransaction, ExecuteChargebackTransaction {
@@ -34,38 +37,50 @@ public class TransactionFacade implements ObtainTransactionsById, ObtainTransact
 
     @Override
     public TransactionData handler(ObtainTransactionByIdQuery query) {
-        TransactionData transactionsById = transaction.getTransactionsById(query.id()).orElseThrow(
-                TransactionNotFoundException::new);
+        TransactionData transactionsById = transaction.getTransactionsById(query.id())
+                .orElseThrow(TransactionNotFoundException::new);
         transactionsById.validateOwnership(query.clientId());
         return transactionsById;
     }
 
     @Override
     public void handle(WalletMessage message) {
-        this.transaction.addStepToTransaction(message.getTransactionId(), WalletAdapter.class.getSimpleName(), TransactionStatus.IN_PROGRESS);
+        this.transaction.addStepToTransaction(message.getTransactionId(),
+                WalletAdapter.class.getSimpleName(), TransactionStatus.IN_PROGRESS);
         TransactionStatus status = this.wallet.withdraw(message);
-        this.transaction.addStepToTransaction(message.getTransactionId(), WalletAdapter.class.getSimpleName(), status);
+        this.transaction.addStepToTransaction(message.getTransactionId(),
+                WalletAdapter.class.getSimpleName(), status);
     }
 
     @Override
     public void handle(PaymentMessage message) {
-        this.transaction.addStepToTransaction(message.getTransactionId(), PaymentAdapter.class.getSimpleName(), TransactionStatus.IN_PROGRESS);
+        this.transaction.addStepToTransaction(message.getTransactionId(),
+                PaymentAdapter.class.getSimpleName(), TransactionStatus.IN_PROGRESS);
         TransactionStatus status = this.payment.transfer(message);
-        this.transaction.addStepToTransaction(message.getTransactionId(), PaymentAdapter.class.getSimpleName(), status);
+        this.transaction.addStepToTransaction(message.getTransactionId(),
+                PaymentAdapter.class.getSimpleName(), status);
         if (TransactionStatus.FAILED.equals(status)) {
             TransactionStatus chargeBackStatus = this.chargeback.prepareChargeback(
                     message.getTransactionId());
-            this.transaction.addStepToTransaction(message.getTransactionId(), ChargebackAdapter.class.getSimpleName(), chargeBackStatus);
+            this.transaction.addStepToTransaction(message.getTransactionId(),
+                    ChargebackAdapter.class.getSimpleName(), chargeBackStatus);
         }
     }
 
     @Override
     public void handle(ChargebackMessage message) {
-        this.transaction.addStepToTransaction(message.getTransactionId(), ChargebackAdapter.class.getSimpleName(), TransactionStatus.IN_PROGRESS);
-        TransactionStatus status = this.chargeback.chargeback(message);
-        this.transaction.addStepToTransaction(message.getTransactionId(), ChargebackAdapter.class.getSimpleName(), status);
-        if (!TransactionStatus.COMPLETED.equals(status)) {
-            //TODO: SOmething really bad happened
+        try {
+            this.transaction.addStepToTransaction(message.getTransactionId(),
+                    ChargebackAdapter.class.getSimpleName(), TransactionStatus.IN_PROGRESS);
+            TransactionStatus status = this.chargeback.chargeback(message);
+            this.transaction.addStepToTransaction(message.getTransactionId(),
+                    ChargebackAdapter.class.getSimpleName(), status);
+            if (!TransactionStatus.COMPLETED.equals(status)) {
+                throw new ChargebackFailedException(
+                        "Chargeback failed for transaction ID " + message.getTransactionId());
+            }
+        } catch (Exception e) {
+            log.error("Critical failure: {}", e.getMessage(), e);
         }
     }
 

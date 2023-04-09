@@ -48,8 +48,8 @@ public class TransferMoneyController implements TransferMoneyControllerDoc {
     }
 
     @Override
-    public ResponseEntity<TransactionItemResponse> obtainTransactionsById(
-            Long clientId, String transaction) {
+    public ResponseEntity<TransactionItemResponse> obtainTransactionsById(Long clientId,
+            String transaction) {
         TransactionData handler = this.obtainTransactionsById.handler(
                 new ObtainTransactionByIdQuery(transaction, clientId));
         return ResponseEntity.ok(toTransactionItemResponse(handler, true));
@@ -60,12 +60,14 @@ public class TransferMoneyController implements TransferMoneyControllerDoc {
             LocalDate dateToFilter, int page, int size) {
         PaginatedWrapper<TransactionData> handler = this.obtainTransactionByClient.handler(
                 new ObtainTransactionClientQuery(clientId, dateToFilter, page, size));
-        TransactionResponse wrapper = toTransactionResponseWrapper(handler, new MetadataResponse(
-                Map.of("FilterDate", String.valueOf(dateToFilter))), true);
+        TransactionResponse wrapper = toTransactionResponseWrapper(handler,
+                new MetadataResponse(Map.of("FilterDate", String.valueOf(dateToFilter))), true);
         return ResponseEntity.ok(new TransactionResponseWrapper(wrapper));
     }
 
-    private TransactionResponse toTransactionResponseWrapper(PaginatedWrapper<TransactionData> wrapper, MetadataResponse meta, boolean onlyLastStep) {
+    private TransactionResponse toTransactionResponseWrapper(
+            PaginatedWrapper<TransactionData> wrapper, MetadataResponse meta,
+            boolean onlyLastStep) {
 
         List<TransactionItemResponse> transactions = wrapper.data().stream()
                 .map(m -> toTransactionItemResponse(m, onlyLastStep)).toList();
@@ -77,20 +79,24 @@ public class TransferMoneyController implements TransferMoneyControllerDoc {
         return new TransactionResponse(transactions, paginationResponse, meta);
     }
 
-    private TransactionItemResponse toTransactionItemResponse(TransactionData data, boolean onlyLastStep) {
+    private TransactionItemResponse toTransactionItemResponse(TransactionData data,
+            boolean onlyLastStep) {
 
         return new TransactionItemResponse(data.transactionId(), data.createdAt(),
-                getSteps(data.steps(), onlyLastStep).stream().map(this::toTransactionStepResponse).toList());
+                getSteps(data.steps(), onlyLastStep).stream().map(this::toTransactionStepResponse)
+                        .toList());
     }
 
-    private List<TransactionItemData> getSteps(List<TransactionItemData> step, boolean onlyLastStep) {
-        return onlyLastStep ? step.stream()
-                .collect(Collectors.groupingBy(TransactionItemData::targetSystem, Collectors.maxBy(
-                        Comparator.comparing(TransactionItemData::createdAt)))).values().stream()
-                .map(Optional::get).toList() : step;
+    private List<TransactionItemData> getSteps(List<TransactionItemData> step,
+            boolean onlyLastStep) {
+        return onlyLastStep ? step.stream().collect(
+                        Collectors.groupingBy(TransactionItemData::targetSystem,
+                                Collectors.maxBy(Comparator.comparing(TransactionItemData::createdAt))))
+                .values().stream().map(Optional::get).toList() : step;
     }
 
     private TransactionStepResponse toTransactionStepResponse(TransactionItemData data) {
-        return new TransactionStepResponse(data.createdAt(), data.targetSystem(), data.status().toString());
+        return new TransactionStepResponse(data.createdAt(), data.targetSystem(),
+                data.status().toString());
     }
 }

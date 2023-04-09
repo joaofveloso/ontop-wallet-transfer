@@ -29,30 +29,29 @@ public class GenericControllerAdvice {
     public ErrorResponse handleMethodArgumentNotValidException(
             MethodArgumentNotValidException exception) {
         log.warn("Validation failed {}", exception.getMessage());
-        List<SubErrorResponse> subErrors = exception.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(this::getSubErrorResponse)
-                .collect(Collectors.toList());
+        List<SubErrorResponse> subErrors = exception.getBindingResult().getFieldErrors().stream()
+                .map(this::getSubErrorResponse).collect(Collectors.toList());
         return new ErrorResponse("Validation failed!", subErrors);
     }
 
     @ExceptionHandler(InsufficientBalanceException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleInsufficientBalanceException(InsufficientBalanceException exception) {
+    public ErrorResponse handleInsufficientBalanceException(
+            InsufficientBalanceException exception) {
         log.warn("Insufficient balance: {}", exception.getMessage());
         return new ErrorResponse("Insufficient balance", Collections.singletonList(
-                new ErrorResponse.SubErrorResponse("balance", "The account balance is not sufficient for this transaction")
-        ));
+                new ErrorResponse.SubErrorResponse("balance",
+                        "The account balance is not sufficient for this transaction")));
     }
 
     @ExceptionHandler(TransactionNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleTransactionNotFoundException(TransactionNotFoundException exception) {
+    public ErrorResponse handleTransactionNotFoundException(
+            TransactionNotFoundException exception) {
         log.warn("Transaction not found: {}", exception.getMessage());
         return new ErrorResponse("Transaction not found", Collections.singletonList(
-                new ErrorResponse.SubErrorResponse("transactionId", "The specified transaction ID could not be found")
-        ));
+                new ErrorResponse.SubErrorResponse("transactionId",
+                        "The specified transaction ID could not be found")));
     }
 
     @ExceptionHandler(RecipientNotFoundException.class)
@@ -60,17 +59,19 @@ public class GenericControllerAdvice {
     public ErrorResponse handleRecipientNotFoundException(RecipientNotFoundException exception) {
         log.warn("Recipient not found: {}", exception.getMessage());
         return new ErrorResponse("Recipient not found", Collections.singletonList(
-                new ErrorResponse.SubErrorResponse("recipientId", "The specified Recipient Id could not be found")
-        ));
+                new ErrorResponse.SubErrorResponse("recipientId",
+                        "The specified Recipient Id could not be found")));
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMissingRequestHeaderException(MissingRequestHeaderException exception) {
+    public ErrorResponse handleMissingRequestHeaderException(
+            MissingRequestHeaderException exception) {
         log.warn("Missing request header: {}", exception.getMessage());
         return new ErrorResponse("Missing request header", Collections.singletonList(
-                new ErrorResponse.SubErrorResponse("header", "The specified request header is missing: " + exception.getParameter().getParameterName())
-        ));
+                new ErrorResponse.SubErrorResponse("header",
+                        "The specified request header is missing: " + exception.getParameter()
+                                .getParameterName())));
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
@@ -78,8 +79,7 @@ public class GenericControllerAdvice {
     public ErrorResponse handleExpiredJwtException(ExpiredJwtException exception) {
         log.warn("Expired token {}", exception.getMessage());
         return new ErrorResponse("Expired token", Collections.singletonList(
-                new ErrorResponse.SubErrorResponse("token", "The JWT token has expired")
-        ));
+                new ErrorResponse.SubErrorResponse("token", "The JWT token has expired")));
     }
 
     private SubErrorResponse getSubErrorResponse(FieldError fieldError) {

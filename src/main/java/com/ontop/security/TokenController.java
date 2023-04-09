@@ -10,7 +10,6 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,10 +26,10 @@ public class TokenController {
         LocalDateTime expirationDate = now.plusMinutes(30);
         Date issuedAt = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
         Date expiresAt = Date.from(expirationDate.atZone(ZoneId.systemDefault()).toInstant());
-        return Map.of("token", Jwts.builder()
-                .setSubject(String.valueOf(clientId))
-                .setIssuedAt(issuedAt).setExpiration(expiresAt)
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256).compact());
+        return Map.of("token",
+                Jwts.builder().setSubject(String.valueOf(clientId)).setIssuedAt(issuedAt)
+                        .setExpiration(expiresAt).signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                        .compact());
     }
 
     private Key getSignInKey() {

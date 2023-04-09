@@ -15,16 +15,34 @@ public interface PaymentClient {
     PaymentClientResponse executePayment(@RequestBody PaymentClientRequest request);
 
     record PaymentClientRequest(SourceData source, DestinationData destination, BigDecimal amount) {
-        public record SourceData(SourceType type, SourceInformation sourceInformation, AccountData account) {
+
+        public record SourceData(SourceType type, SourceInformation sourceInformation,
+                                 AccountData account) {
+
             public enum SourceType {COMPANY, INDIVIDUAL}
         }
-        public record SourceInformation(String name) { }
-        public record AccountData(String accountNumber, String currency, String routingNumber) { }
-        public record DestinationData(String name, AccountData account) { }
+
+        public record SourceInformation(String name) {
+
+        }
+
+        public record AccountData(String accountNumber, String currency, String routingNumber) {
+
+        }
+
+        public record DestinationData(String name, AccountData account) {
+
+        }
     }
 
     record PaymentClientResponse(PaymentRequestInfoData requestInfo, PaymentInfoData paymentInfo) {
-        public record PaymentRequestInfoData(String status) { }
-        public record PaymentInfoData(BigDecimal amount, String id) { }
+
+        public record PaymentRequestInfoData(String status) {
+
+        }
+
+        public record PaymentInfoData(BigDecimal amount, String id) {
+
+        }
     }
 }

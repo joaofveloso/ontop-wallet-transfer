@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -54,13 +52,15 @@ public class PaymentAdapter implements Payment {
     private final WalletAdapter walletAdapter;
 
     @Override
-    public TransactionStatus prepareTransfer(
-            BigDecimal amount, RecipientData recipientData, String transactionId) {
+    public TransactionStatus prepareTransfer(BigDecimal amount, RecipientData recipientData,
+            String transactionId) {
         ProducerRecord<String, PaymentMessage> paymentRecord = new ProducerRecord<>(this.topic,
                 transactionId, new PaymentMessage(recipientData.clientId(), recipientData.id(),
                 recipientData.name(), recipientData.routingNumber(),
-                recipientData.nationalIdentification(), recipientData.accountNumber(), amount,transactionId));
-        paymentRecord.headers().add("x-transaction-id", transactionId.getBytes(StandardCharsets.UTF_8));
+                recipientData.nationalIdentification(), recipientData.accountNumber(), amount,
+                transactionId));
+        paymentRecord.headers()
+                .add("x-transaction-id", transactionId.getBytes(StandardCharsets.UTF_8));
         try {
             this.paymentProducer.send(paymentRecord).get();
             return TransactionStatus.PENDING;
@@ -86,27 +86,29 @@ public class PaymentAdapter implements Payment {
             log.warn("Transaction Transfer >>> {}: {}", message.getTransactionId(), e.getMessage());
             return TransactionStatus.CANCELED;
         } catch (FeignException e) {
-            log.error("Transaction Transfer >>> {}: {}", message.getTransactionId(), e.getMessage());
+            log.error("Transaction Transfer >>> {}: {}", message.getTransactionId(),
+                    e.getMessage());
             return TransactionStatus.FAILED;
         }
     }
 
     // TODO: Transfer it to a Object Value
-    private Runnable walletIsCompleted(String transactionId, CompletableFuture<TransactionStatus> future) {
+    private Runnable walletIsCompleted(String transactionId,
+            CompletableFuture<TransactionStatus> future) {
         long timeout = 5000;
         long start = System.currentTimeMillis();
         return () -> {
             final StringBuilder buffer = new StringBuilder();
             while (System.currentTimeMillis() - start < timeout && buffer.isEmpty()) {
-                List<TransactionItem> transactionItems = transactionRepository.findById(transactionId)
-                        .map(TransactionEntity::getSteps)
+                List<TransactionItem> transactionItems = transactionRepository.findById(
+                                transactionId).map(TransactionEntity::getSteps)
                         .orElse(Collections.emptyList());
 
-                Optional<TransactionItem> walletItem = transactionItems.stream()
-                        .filter(item -> WalletAdapter.class.getSimpleName().equals(item.getTargetSystem()) &&
-                                (TransactionStatus.COMPLETED.toString().equals(item.getStatus()) ||
-                                        TransactionStatus.FAILED.toString().equals(item.getStatus())))
-                        .findFirst();
+                Optional<TransactionItem> walletItem = transactionItems.stream().filter(item ->
+                        WalletAdapter.class.getSimpleName().equals(item.getTargetSystem()) && (
+                                TransactionStatus.COMPLETED.toString().equals(item.getStatus())
+                                        || TransactionStatus.FAILED.toString()
+                                        .equals(item.getStatus()))).findFirst();
 
                 if (walletItem.isPresent()) {
                     String status = walletItem.get().getStatus();
@@ -122,7 +124,8 @@ public class PaymentAdapter implements Payment {
                 }
             }
             if (buffer.isEmpty()) {
-                future.completeExceptionally(new InterruptedException("Timeout waiting for transaction completion"));
+                future.completeExceptionally(
+                        new InterruptedException("Timeout waiting for transaction completion"));
             } else {
                 future.complete(TransactionStatus.valueOf(buffer.toString()));
             }
@@ -132,10 +135,14 @@ public class PaymentAdapter implements Payment {
     private PaymentClientRequest toPaymentClientRequest(PaymentMessage paymentMessage) {
 
         SourceInformation sourceInformation = new SourceInformation(this.sourceName);
-        AccountData sourceAccountData = new AccountData(this.accountNumber, this.currency, this.routingNumber);
-        SourceData sourceData = new SourceData(SourceType.COMPANY, sourceInformation, sourceAccountData);
-        AccountData destinationAccountData = new AccountData(paymentMessage.getAccountNumber(), this.currency, paymentMessage.getRoutingNumber());
-        DestinationData destinationData = new DestinationData(paymentMessage.getName(), destinationAccountData);
+        AccountData sourceAccountData = new AccountData(this.accountNumber, this.currency,
+                this.routingNumber);
+        SourceData sourceData = new SourceData(SourceType.COMPANY, sourceInformation,
+                sourceAccountData);
+        AccountData destinationAccountData = new AccountData(paymentMessage.getAccountNumber(),
+                this.currency, paymentMessage.getRoutingNumber());
+        DestinationData destinationData = new DestinationData(paymentMessage.getName(),
+                destinationAccountData);
         return new PaymentClientRequest(sourceData, destinationData, paymentMessage.getAmount());
     }
 }

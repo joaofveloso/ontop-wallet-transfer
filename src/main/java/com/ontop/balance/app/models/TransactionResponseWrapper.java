@@ -5,12 +5,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.ontop.balance.app.controllers.TransferMoneyControllerDoc;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import lombok.Getter;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 
 @Getter
+@Schema(description = "A wrapper for a transaction response")
 public class TransactionResponseWrapper extends RepresentationModel<TransactionResponseWrapper> {
 
     private final @JsonUnwrapped TransactionResponse response;

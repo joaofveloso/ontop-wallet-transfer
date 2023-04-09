@@ -9,17 +9,16 @@ import com.ontop.balance.infrastructure.clients.WalletClient.BalanceClientRespon
 import com.ontop.balance.infrastructure.clients.WalletClient.TransactionClientRequest;
 import com.ontop.kernels.WalletMessage;
 import feign.FeignException;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Component
@@ -33,9 +32,12 @@ public class WalletAdapter implements Wallet {
     private final KafkaTemplate<String, WalletMessage> walletProducer;
 
     @Override
-    public TransactionStatus prepareWithdraw(BigDecimal amount, RecipientData recipientData, String transactionId) {
-        ProducerRecord<String, WalletMessage> walletRecord = new ProducerRecord<>(this.topic, transactionId, new WalletMessage(recipientData.clientId(), amount, transactionId));
-        walletRecord.headers().add("x-transaction-id", transactionId.getBytes(StandardCharsets.UTF_8));
+    public TransactionStatus prepareWithdraw(BigDecimal amount, RecipientData recipientData,
+            String transactionId) {
+        ProducerRecord<String, WalletMessage> walletRecord = new ProducerRecord<>(this.topic,
+                transactionId, new WalletMessage(recipientData.clientId(), amount, transactionId));
+        walletRecord.headers()
+                .add("x-transaction-id", transactionId.getBytes(StandardCharsets.UTF_8));
         try {
             this.walletProducer.send(walletRecord).get();
             return TransactionStatus.PENDING;
@@ -48,10 +50,13 @@ public class WalletAdapter implements Wallet {
     @Override
     public TransactionStatus withdraw(WalletMessage message) {
         try {
-            this.walletClient.executeTransaction(new TransactionClientRequest(message.getAmount().negate(), message.getClientId()));
+            this.walletClient.executeTransaction(
+                    new TransactionClientRequest(message.getAmount().negate(),
+                            message.getClientId()));
             return TransactionStatus.COMPLETED;
         } catch (FeignException e) {
-            log.error("Transaction Withdraw >>> {}: {}", message.getTransactionId(), e.getMessage());
+            log.error("Transaction Withdraw >>> {}: {}", message.getTransactionId(),
+                    e.getMessage());
             return TransactionStatus.FAILED;
         }
     }
