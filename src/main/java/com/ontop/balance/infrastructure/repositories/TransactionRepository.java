@@ -1,6 +1,6 @@
 package com.ontop.balance.infrastructure.repositories;
 
-import com.ontop.balance.infrastructure.entity.TransactionEntity;
+import com.ontop.balance.infrastructure.entities.TransactionEntity;
 import java.time.LocalDate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

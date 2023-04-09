@@ -1,4 +1,4 @@
-package com.ontop.balance.infrastructure.entity;
+package com.ontop.balance.infrastructure.entities;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

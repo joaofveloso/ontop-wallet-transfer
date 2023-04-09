@@ -1,4 +1,4 @@
-package com.ontop.balance.infrastructure.entity;
+package com.ontop.balance.infrastructure.entities;
 
 
 import lombok.AllArgsConstructor;

@@ -7,7 +7,7 @@ import com.ontop.balance.core.model.commands.CreateRecipientCommand;
 import com.ontop.balance.core.model.queries.ObtainRecipientByClientQuery;
 import com.ontop.balance.core.model.queries.ObtainRecipientByIdQuery;
 import com.ontop.balance.core.ports.outbound.Recipient;
-import com.ontop.balance.infrastructure.entity.RecipientEntity;
+import com.ontop.balance.infrastructure.entities.RecipientEntity;
 import com.ontop.balance.infrastructure.repositories.RecipientRepository;
 import java.math.BigDecimal;
 import java.util.List;

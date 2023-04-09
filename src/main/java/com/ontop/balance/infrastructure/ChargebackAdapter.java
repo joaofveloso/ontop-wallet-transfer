@@ -4,7 +4,7 @@ import com.ontop.balance.core.model.TransactionData.TransactionStatus;
 import com.ontop.balance.core.ports.outbound.Chargeback;
 import com.ontop.balance.infrastructure.clients.WalletClient;
 import com.ontop.balance.infrastructure.clients.WalletClient.TransactionClientRequest;
-import com.ontop.balance.infrastructure.entity.TransactionEntity;
+import com.ontop.balance.infrastructure.entities.TransactionEntity;
 import com.ontop.balance.infrastructure.repositories.TransactionRepository;
 import com.ontop.kernels.ChargebackMessage;
 import feign.FeignException;

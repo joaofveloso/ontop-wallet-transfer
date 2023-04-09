@@ -10,8 +10,8 @@ import com.ontop.balance.infrastructure.clients.PaymentClient.PaymentClientReque
 import com.ontop.balance.infrastructure.clients.PaymentClient.PaymentClientRequest.SourceData;
 import com.ontop.balance.infrastructure.clients.PaymentClient.PaymentClientRequest.SourceData.SourceType;
 import com.ontop.balance.infrastructure.clients.PaymentClient.PaymentClientRequest.SourceInformation;
-import com.ontop.balance.infrastructure.entity.TransactionEntity;
-import com.ontop.balance.infrastructure.entity.TransactionEntity.TransactionItem;
+import com.ontop.balance.infrastructure.entities.TransactionEntity;
+import com.ontop.balance.infrastructure.entities.TransactionEntity.TransactionItem;
 import com.ontop.balance.infrastructure.repositories.TransactionRepository;
 import com.ontop.kernels.PaymentMessage;
 import feign.FeignException;
