@@ -23,7 +23,7 @@ docker-compose up -d
 The application will start running on port 8080
 
 ## Usage
-To use the application, open your web browser and navigate to http://localhost:8080/swagger-ui/index.html. This will open a Swagger-UI interface where you can interact with the API. For more information on how to use the tool, please refer to the file named "LINK TO FILE HERE".
+To use the application, open your web browser and navigate to http://localhost:8080/swagger-ui/index.html. This will open a Swagger-UI interface where you can interact with the API. For more information on how to use the tool, please refer to the file named **[USAGE.md](./USAGE.md)**.'
 
 ## Contributing
 If you'd like to contribute to this project, please follow these guidelines:
