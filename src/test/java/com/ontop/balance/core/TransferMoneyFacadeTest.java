@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 
 import com.ontop.balance.core.model.BalanceData;
 import com.ontop.balance.core.model.RecipientData;
+import com.ontop.balance.core.model.TransactionData.TransactionStatus;
 import com.ontop.balance.core.model.commands.TransferMoneyCommand;
 import com.ontop.balance.core.model.exceptions.IllegalAmountValueExcpetion;
 import com.ontop.balance.core.model.exceptions.InsufficientBalanceException;
@@ -66,9 +67,9 @@ class TransferMoneyFacadeTest extends BaseTestCase {
         doReturn(Optional.of(recipientData)).when(this.recipient)
                 .findRecipientById(any(ObtainRecipientByIdQuery.class));
         doReturn(Optional.of(balanceData)).when(this.wallet).getBalance(anyLong());
-        doNothing().when(this.wallet)
+        doReturn(TransactionStatus.PENDING).when(this.wallet)
                 .prepareWithdraw(any(BigDecimal.class), any(RecipientData.class), anyString());
-        doNothing().when(this.payment)
+        doReturn(TransactionStatus.PENDING).when(this.payment)
                 .prepareTransfer(any(BigDecimal.class), any(RecipientData.class), anyString());
 
         this.transferMoneyFacade.handler(command);
