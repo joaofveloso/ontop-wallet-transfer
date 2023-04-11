@@ -34,7 +34,7 @@ Container_Boundary(api, "API Application") {
     Rel(transactionFacade, db, "Read & write to", "MongoDB Driver")
 }
 
-Rel(spa, sigin, "Uses", "JSON/HTTPS");"
+Rel(spa, sigin, "Uses", "JSON/HTTPS")
 Rel(spa, receipts, "Uses", "JSON/HTTPS")
 Rel(spa, transfer, "Uses", "JSON/HTTPS")
 
