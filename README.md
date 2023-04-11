@@ -13,6 +13,19 @@ The Core Layer contains the business logic of the application and is written pur
 ### Infrastructure Layer
 The Infrastructure Layer is responsible for handling external communication and data persistence. This layer includes the implementation of services and repositories, as well as integrations with Kafka and MongoDB. By keeping these concerns separate from the Core Layer, we can easily swap out different technologies or implementations if needed.
 
+## Diagrams
+The following diagrams represent the system views:
+
+### Context 
+
+![](./diagrams/Context.svg)
+
+### Container
+![](./diagrams/Container.svg)
+
+### Component
+![](./diagrams/Component.svg)
+
 ## Instalation
 To install and run this application, you can use the probided docker-compose file. Firstly, clone the repository:
 
