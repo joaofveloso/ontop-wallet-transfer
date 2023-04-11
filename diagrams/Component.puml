@@ -1,0 +1,41 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+' uncomment the following line and comment the first to use locally
+' !include C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Component diagram for Internet Banking System - API Application
+
+Container(spa, "Frontend Application", "TBD", "Provides all functionalities related to recipient and money transfer transactions")
+System_Ext(sigin, "Sign In", "Store information related to user authentication and authorization and reurn a JWT token")
+ContainerDb_Ext(db, "Database", "NoSQL Database", "Store user account receipts, and transaction related processes")
+Container_Ext(publisher, "Publisher", "KAFKA", "Handles publishing messages to Kafka topics")
+
+Container_Boundary(api, "API Application") {
+
+    Component(receipts, "Receipts Controller", "MVC Rest Controller", "Provides REST API to fetch recipients and create new ones")
+    Component(receiptsFacade, "Receipts Facade", "Spring Bean", "A facade onto the database")
+
+    Component(transfer, "Money Trances Controller", "MVC Rest Controller", "Provides a REST API to create new transactions and fetch status of previous transactions")
+    Component(transferFacade, "Transfer Facade", "Spring Bean", "A facade onto the database and Kafka publisher")
+
+    Component(listener, "Transaction Listener", "Kafka Listener Component", "Processes incoming messages from Kafka topics")
+    Component(transactionFacade, "Transaction Facade", "Spring Bean", "A facade onto the database and Kafka publisher")
+
+    Rel(receipts, receiptsFacade, "Uses")
+    Rel(receiptsFacade, db, "Read & write to", "MongoDB Driver")
+    Rel(transfer, transferFacade, "Uses")
+    Rel(transferFacade, db, "Read & write to", "MongoDB Driver")
+    Rel(transferFacade, publisher, "Publish to", "Kafka[wallet, payment]")
+    Rel(publisher, listener, "Listen to", "Kafka[transaction, payment, chargeback]")
+    Rel(listener, transactionFacade, "Uses")
+    Rel(transactionFacade, publisher, "Publish to", Kafka[Chargeback])
+    Rel(transactionFacade, db, "Read & write to", "MongoDB Driver")
+}
+
+Rel(spa, sigin, "Uses", "JSON/HTTPS");"
+Rel(spa, receipts, "Uses", "JSON/HTTPS")
+Rel(spa, transfer, "Uses", "JSON/HTTPS")
+
+@enduml

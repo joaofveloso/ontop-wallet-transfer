@@ -1,0 +1,14 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title System Context diagram for Wallet balance management system
+
+Person(user, "User", "Client who wants to manage their wallet and transfer money to external accounts")
+System(walletSystem, "Wallet System", "Holds the recipient accounts a client, and uses it to call external account to check balance and transfer money to recipient")
+System_Ext(externalSystem, "External System", "Provides a REST API for checking balance and transferring money to an external account")
+
+Rel(user, walletSystem, "Uses")
+Rel(walletSystem, externalSystem, "http")
+@enduml

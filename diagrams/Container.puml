@@ -1,0 +1,21 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/java.puml
+!include DEVICONS/mongodb.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "Client", "Client who wants to manage their wallet and transfer money to external accounts")
+Container(spa, "Front", "Swagger", "The main interface that users interacts with")
+Container(api, "API", "java", "Handles recipient creation and transacion to transfer money", $sprite="java")
+ContainerDb(db, "Database", "MongoDb", "Holds recipient and transactions", $sprite="mongodb")
+System_Ext(externalSystem, "External System", "Provides a REST API for checking balance and transferring money to an external account")
+
+Rel(user, spa, "Uses", "https")
+Rel(spa, api, "Uses", "https")
+Rel_R(api, db, "Reads/Writes")
+Rel(api, externalSystem, "http")
+@enduml
