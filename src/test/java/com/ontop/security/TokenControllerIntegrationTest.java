@@ -21,9 +21,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.mockito.Mockito.when;
+import com.ontop.balance.infrastructure.configs.MongoTestContainerConfig;
+import org.springframework.context.annotation.Import;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Import(MongoTestContainerConfig.class)
 class TokenControllerIntegrationTest {
 
     @Autowired

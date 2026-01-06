@@ -31,6 +31,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ontop.balance.infrastructure.configs.MongoTestContainerConfig;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Import;
 
 /**
  * Integration tests for pagination parameter validation at the HTTP level.
@@ -44,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(MongoTestContainerConfig.class)
 @DisplayName("Pagination Validation Integration Tests")
 class PaginationValidationIntegrationTest {
 
