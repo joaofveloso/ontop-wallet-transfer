@@ -11,6 +11,8 @@ import io.jsonwebtoken.ExpiredJwtException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
@@ -33,6 +35,19 @@ public class GenericControllerAdvice {
         log.warn("Validation failed {}", exception.getMessage());
         List<SubErrorResponse> subErrors = exception.getBindingResult().getFieldErrors().stream()
                 .map(this::getSubErrorResponse).collect(Collectors.toList());
+        return new ErrorResponse("Validation failed!", subErrors);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConstraintViolationException(
+            ConstraintViolationException exception) {
+        log.warn("Method validation failed: {}", exception.getMessage());
+        List<ErrorResponse.SubErrorResponse> subErrors = exception.getConstraintViolations().stream()
+                .map(v -> new ErrorResponse.SubErrorResponse(
+                        v.getPropertyPath().toString(),
+                        v.getMessage()))
+                .collect(Collectors.toList());
         return new ErrorResponse("Validation failed!", subErrors);
     }
 

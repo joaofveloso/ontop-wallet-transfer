@@ -3,6 +3,14 @@ package com.ontop.balance.core.model.queries;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
+/**
+ * Query parameters for obtaining recipients by client ID.
+ * <p>
+ * Note: Validation annotations on this record provide documentation
+ * but actual runtime validation occurs via @Validated on controller
+ * methods with @RequestParam constraints.
+ * </p>
+ */
 public record ObtainRecipientByClientQuery(
         Long clientId,
         @Min(value = 0, message = "Page must be 0 or greater") int page,

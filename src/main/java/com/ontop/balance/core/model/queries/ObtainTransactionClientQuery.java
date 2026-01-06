@@ -4,6 +4,14 @@ import java.time.LocalDate;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
+/**
+ * Query parameters for obtaining transactions by client ID.
+ * <p>
+ * Note: Validation annotations on this record provide documentation
+ * but actual runtime validation occurs via @Validated on controller
+ * methods with @RequestParam constraints.
+ * </p>
+ */
 public record ObtainTransactionClientQuery(
         Long clientId,
         LocalDate date,
