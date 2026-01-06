@@ -1,10 +1,15 @@
 package com.ontop.balance.infrastructure.interceptors;
 
+import com.ontop.balance.core.model.exceptions.InvalidTokenException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import java.io.IOException;
 import java.security.Key;
 import java.util.Collections;
@@ -25,10 +30,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class TokenFilter implements Filter {
 
@@ -48,8 +55,13 @@ public class TokenFilter implements Filter {
         MutableHttpRequest mutableHttpRequest = new MutableHttpRequest(req);
         String token = mutableHttpRequest.getHeader(HttpHeaders.AUTHORIZATION);
         if (token != null && token.startsWith("Bearer ")) {
-            String[] tokenParts = token.split(" ");
-            mutableHttpRequest.putHeader("X-Client-Id", getSubject(tokenParts[1]));
+            String jwtToken = token.substring(7).trim();
+            if (jwtToken.isEmpty()) {
+                log.warn("Empty token after Bearer prefix");
+                chain.doFilter(mutableHttpRequest, response);
+                return;
+            }
+            mutableHttpRequest.putHeader("X-Client-Id", getSubject(jwtToken));
         }
         chain.doFilter(mutableHttpRequest, response);
     }
@@ -60,9 +72,26 @@ public class TokenFilter implements Filter {
     }
 
     private String getSubject(String token) {
-        JwtParser parser = Jwts.parserBuilder().setSigningKey(getSignInKey()).build();
-        Claims claims = parser.parseClaimsJws(token).getBody();
-        return claims.getSubject();
+        try {
+            JwtParser parser = Jwts.parserBuilder().setSigningKey(getSignInKey()).build();
+            Claims claims = parser.parseClaimsJws(token).getBody();
+            return claims.getSubject();
+        } catch (ExpiredJwtException e) {
+            log.error("Token has expired", e);
+            throw new InvalidTokenException("Token has expired", e);
+        } catch (UnsupportedJwtException e) {
+            log.error("Token format not supported", e);
+            throw new InvalidTokenException("Token format not supported", e);
+        } catch (MalformedJwtException e) {
+            log.error("Token is malformed", e);
+            throw new InvalidTokenException("Token is malformed", e);
+        } catch (SignatureException e) {
+            log.error("Token signature validation failed", e);
+            throw new InvalidTokenException("Token signature validation failed", e);
+        } catch (IllegalArgumentException e) {
+            log.error("Token is illegal or null", e);
+            throw new InvalidTokenException("Token is illegal or null", e);
+        }
     }
 
     private static class MutableHttpRequest extends HttpServletRequestWrapper {
