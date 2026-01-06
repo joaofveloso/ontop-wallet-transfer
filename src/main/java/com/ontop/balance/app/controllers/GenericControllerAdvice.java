@@ -3,8 +3,10 @@ package com.ontop.balance.app.controllers;
 import com.ontop.balance.app.models.ErrorResponse;
 import com.ontop.balance.app.models.ErrorResponse.SubErrorResponse;
 import com.ontop.balance.core.model.exceptions.InsufficientBalanceException;
+import com.ontop.balance.core.model.exceptions.InvalidTokenException;
 import com.ontop.balance.core.model.exceptions.RecipientNotFoundException;
 import com.ontop.balance.core.model.exceptions.TransactionNotFoundException;
+import com.ontop.balance.core.model.exceptions.UnauthorizedException;
 import io.jsonwebtoken.ExpiredJwtException;
 import java.util.Collections;
 import java.util.List;
@@ -80,6 +82,24 @@ public class GenericControllerAdvice {
         log.warn("Expired token {}", exception.getMessage());
         return new ErrorResponse("Expired token", Collections.singletonList(
                 new ErrorResponse.SubErrorResponse("token", "The JWT token has expired")));
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleInvalidTokenException(InvalidTokenException exception) {
+        log.warn("Invalid token: {}", exception.getMessage());
+        return new ErrorResponse("Invalid token",
+                Collections.singletonList(
+                        new ErrorResponse.SubErrorResponse("token", exception.getMessage())));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleUnauthorizedException(UnauthorizedException exception) {
+        log.warn("Unauthorized access: {}", exception.getMessage());
+        return new ErrorResponse("Authentication failed",
+                Collections.singletonList(
+                        new ErrorResponse.SubErrorResponse("authentication", exception.getMessage())));
     }
 
     private SubErrorResponse getSubErrorResponse(FieldError fieldError) {
