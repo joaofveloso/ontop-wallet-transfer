@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.ontop.balance.infrastructure.configs.FeignClientConfig;
+
 @Component
-@FeignClient(name = "payments", url = "${core.wallet.client.url}")
+@FeignClient(name = "payments", url = "${core.wallet.client.url}",
+             configuration = FeignClientConfig.class)
 public interface PaymentClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/api/v1/payments", consumes = "application/json")
