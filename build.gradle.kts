@@ -41,6 +41,14 @@ tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     mainClass.set("com.ontop.OntopApplication")
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+    maxParallelForks = 1
+    systemProperty("spring.profiles.active", "test")
+    systemProperty("java.security.egd", "file:/dev/./urandom")
+    jvmArgs("-Xmx2g")
+}
+
 dependencies {
     // Spring Boot Core
     implementation("org.springframework.boot:spring-boot-starter-web")
