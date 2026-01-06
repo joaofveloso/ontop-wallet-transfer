@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import com.ontop.balance.core.model.exceptions.UnauthorizedException;
 import com.ontop.balance.infrastructure.entities.ClientCredentialsEntity;
 import com.ontop.balance.infrastructure.repositories.ClientCredentialsRepository;
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,6 +32,9 @@ class TokenControllerTest {
 
     @Mock
     private ClientCredentialsRepository clientCredentialsRepository;
+
+    @Mock
+    private HttpServletRequest request;
 
     @InjectMocks
     private TokenController tokenController;
@@ -42,9 +47,13 @@ class TokenControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Initialize secret key for testing (512 bits = 64 bytes)
+        // Initialize secret key for testing (512 bits = 64 bytes when decoded)
         String testSecret = "dGhpc0lzQVZlcnlTdHJvbmcxMjhCaXRTZWNyZXRLZXlGb3JKV1RTaWduaW5nSXRVc2VkSW5UZXN0cw==";
         ReflectionTestUtils.setField(tokenController, "secretKey", testSecret);
+        ReflectionTestUtils.setField(tokenController, "jwtExpirationHours", 24);
+
+        // Mock HttpServletRequest
+        when(request.getRemoteAddr()).thenReturn("127.0.0.1");
 
         // Initialize password encoder
         org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder passwordEncoder =
@@ -83,12 +92,14 @@ class TokenControllerTest {
                 .thenReturn(activeClient);
 
         // Act
-        Map<String, String> response = tokenController.createJwtToken(clientId, loginRequest);
+        ResponseEntity<Map<String, String>> response = tokenController.createJwtToken(
+                clientId, loginRequest, request);
 
         // Assert
         assertNotNull(response, "Response should not be null");
-        assertTrue(response.containsKey("token"), "Response should contain token");
-        String token = response.get("token");
+        assertNotNull(response.getBody(), "Response body should not be null");
+        assertTrue(response.getBody().containsKey("token"), "Response should contain token");
+        String token = response.getBody().get("token");
         assertNotNull(token, "Token should not be empty");
         assertTrue(token.length() > 100, "JWT token should have reasonable length");
 
@@ -109,7 +120,7 @@ class TokenControllerTest {
         // Act & Assert
         UnauthorizedException exception = assertThrows(
                 UnauthorizedException.class,
-                () -> tokenController.createJwtToken(clientId, loginRequest)
+                () -> tokenController.createJwtToken(clientId, loginRequest, request)
         );
 
         assertEquals("Invalid client credentials", exception.getMessage());
@@ -131,7 +142,7 @@ class TokenControllerTest {
         // Act & Assert
         UnauthorizedException exception = assertThrows(
                 UnauthorizedException.class,
-                () -> tokenController.createJwtToken(nonExistentClientId, loginRequest)
+                () -> tokenController.createJwtToken(nonExistentClientId, loginRequest, request)
         );
 
         assertEquals("Invalid client credentials", exception.getMessage());
@@ -153,7 +164,7 @@ class TokenControllerTest {
         // Act & Assert
         UnauthorizedException exception = assertThrows(
                 UnauthorizedException.class,
-                () -> tokenController.createJwtToken(inactiveClientId, loginRequest)
+                () -> tokenController.createJwtToken(inactiveClientId, loginRequest, request)
         );
 
         assertEquals("Invalid client credentials", exception.getMessage());
@@ -175,10 +186,10 @@ class TokenControllerTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act - First login
-        tokenController.createJwtToken(clientId, loginRequest);
+        tokenController.createJwtToken(clientId, loginRequest, request);
 
         // Act - Second login
-        tokenController.createJwtToken(clientId, loginRequest);
+        tokenController.createJwtToken(clientId, loginRequest, request);
 
         // Assert - Should be called twice (once per login)
         verify(clientCredentialsRepository, org.mockito.Mockito.times(2)).save(any(ClientCredentialsEntity.class));
@@ -198,9 +209,29 @@ class TokenControllerTest {
                 .thenReturn(activeClient);
 
         // Act - should not throw exception
-        Map<String, String> response = tokenController.createJwtToken(clientId, loginRequest);
+        ResponseEntity<Map<String, String>> response = tokenController.createJwtToken(
+                clientId, loginRequest, request);
 
         // Assert
-        assertNotNull(response.get("token"));
+        assertNotNull(response.getBody().get("token"));
+    }
+
+    @Test
+    @DisplayName("Valid credentials with @Min(1) clientId validation should work")
+    void testMinClientIdValidation() {
+        // Arrange
+        LoginRequest loginRequest = new LoginRequest(validSecret);
+        Long clientId = 1L; // Valid: >= 1
+
+        when(clientCredentialsRepository.findByClientIdAndActiveTrue(clientId))
+                .thenReturn(Optional.of(activeClient));
+        when(clientCredentialsRepository.save(any(ClientCredentialsEntity.class)))
+                .thenReturn(activeClient);
+
+        // Act & Assert - should not throw exception
+        ResponseEntity<Map<String, String>> response = tokenController.createJwtToken(
+                clientId, loginRequest, request);
+
+        assertNotNull(response.getBody().get("token"));
     }
 }

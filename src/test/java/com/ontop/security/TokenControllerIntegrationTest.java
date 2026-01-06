@@ -7,16 +7,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.ontop.balance.core.model.exceptions.UnauthorizedException;
 import com.ontop.balance.infrastructure.entities.ClientCredentialsEntity;
 import com.ontop.balance.infrastructure.repositories.ClientCredentialsRepository;
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -28,6 +32,9 @@ class TokenControllerIntegrationTest {
     @Autowired
     private ClientCredentialsRepository clientCredentialsRepository;
 
+    @MockBean
+    private HttpServletRequest request;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     private ClientCredentialsEntity activeClient;
@@ -37,6 +44,9 @@ class TokenControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        // Mock HttpServletRequest
+        when(request.getRemoteAddr()).thenReturn("127.0.0.1");
+
         // Clean up database
         clientCredentialsRepository.deleteAll();
 
@@ -69,12 +79,14 @@ class TokenControllerIntegrationTest {
         Long clientId = activeClient.getClientId();
 
         // Act
-        Map<String, String> response = tokenController.createJwtToken(clientId, loginRequest);
+        ResponseEntity<Map<String, String>> response = tokenController.createJwtToken(
+                clientId, loginRequest, request);
 
         // Assert
         assertNotNull(response, "Response should not be null");
-        assertTrue(response.containsKey("token"), "Response should contain token");
-        String token = response.get("token");
+        assertNotNull(response.getBody(), "Response body should not be null");
+        assertTrue(response.getBody().containsKey("token"), "Response should contain token");
+        String token = response.getBody().get("token");
         assertNotNull(token, "Token should not be empty");
         assertTrue(token.length() > 50, "JWT token should have reasonable length");
 
@@ -93,7 +105,7 @@ class TokenControllerIntegrationTest {
         // Act & Assert
         UnauthorizedException exception = org.junit.jupiter.api.Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> tokenController.createJwtToken(clientId, loginRequest)
+                () -> tokenController.createJwtToken(clientId, loginRequest, request)
         );
 
         assertEquals("Invalid client credentials", exception.getMessage());
@@ -109,7 +121,7 @@ class TokenControllerIntegrationTest {
         // Act & Assert
         UnauthorizedException exception = org.junit.jupiter.api.Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> tokenController.createJwtToken(nonExistentClientId, loginRequest)
+                () -> tokenController.createJwtToken(nonExistentClientId, loginRequest, request)
         );
 
         assertEquals("Invalid client credentials", exception.getMessage());
@@ -125,7 +137,7 @@ class TokenControllerIntegrationTest {
         // Act & Assert
         UnauthorizedException exception = org.junit.jupiter.api.Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> tokenController.createJwtToken(inactiveClientId, loginRequest)
+                () -> tokenController.createJwtToken(inactiveClientId, loginRequest, request)
         );
 
         assertEquals("Invalid client credentials", exception.getMessage());
@@ -142,7 +154,7 @@ class TokenControllerIntegrationTest {
         // This should trigger validation exception before authentication logic
         org.junit.jupiter.api.Assertions.assertThrows(
                 Exception.class,
-                () -> tokenController.createJwtToken(clientId, loginRequest)
+                () -> tokenController.createJwtToken(clientId, loginRequest, request)
         );
     }
 
@@ -154,7 +166,7 @@ class TokenControllerIntegrationTest {
         Long clientId = activeClient.getClientId();
 
         // Act - First login
-        tokenController.createJwtToken(clientId, loginRequest);
+        tokenController.createJwtToken(clientId, loginRequest, request);
         LocalDateTime firstLoginTime = clientCredentialsRepository.findById(clientId).orElseThrow()
                 .getLastUsedAt();
 
@@ -166,7 +178,7 @@ class TokenControllerIntegrationTest {
         }
 
         // Act - Second login
-        tokenController.createJwtToken(clientId, loginRequest);
+        tokenController.createJwtToken(clientId, loginRequest, request);
         LocalDateTime secondLoginTime = clientCredentialsRepository.findById(clientId).orElseThrow()
                 .getLastUsedAt();
 
@@ -191,10 +203,11 @@ class TokenControllerIntegrationTest {
         Long clientId = activeClient.getClientId();
 
         // Act
-        Map<String, String> response = tokenController.createJwtToken(clientId, loginRequest);
+        ResponseEntity<Map<String, String>> response = tokenController.createJwtToken(
+                clientId, loginRequest, request);
 
         // Assert
-        assertNotNull(response.get("token"), "Token should be generated");
+        assertNotNull(response.getBody().get("token"), "Token should be generated");
         // Additional JWT parsing and verification could be added here
         // to verify the subject claim matches the clientId
     }
