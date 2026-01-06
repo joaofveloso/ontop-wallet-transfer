@@ -1,0 +1,52 @@
+server:
+  port: 8080
+
+springdoc:
+  show-actuator: true
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_USERNAME:ontop_user}:${MONGO_PASSWORD:ontop_pass}@${MONGO_HOST:mongodb}:27017/${MONGO_DB:ontop}?w=majority
+      auto-index-creation: true
+  kafka:
+    bootstrap-servers: kafka:9092
+  banner:
+    location: classpath:banner.txt
+  profiles:
+    active: dev
+
+logging:
+  level:
+    com.ontop.balance.*: DEBUG
+    feign.*: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.data.mongodb.core.MongoAction: TRACE
+    org.springframework.security: DEBUG
+
+core:
+  ontop:
+    fee: 0.1
+    source:
+      name: ONTOP INC
+      account: 0245253419
+      currency: USD
+      routing: 028444018
+
+  topic: money-transfer-transactions
+  wallet:
+    client:
+      url: ${WALLET_SERVICE_URL:https://mockoon.tools.getontop.com:3000}
+
+jwt:
+  secret: ${JWT_SECRET:base64EncodedSecretKeyMustBe256BitsOrMoreForDevelopmentEnvironmentShouldBeChangedInProduction}
+  expiration-hours: ${JWT_EXPIRATION_HOURS:24}
+
+# Development-specific configuration
+dev:
+  security:
+    # Seed data is automatically loaded by MongoDB docker initialization
+    # Test credentials:
+    #   Client ID: 123456, Secret: secret123
+    #   Client ID: 789012, Secret: password456
+    seed-data-loaded: true

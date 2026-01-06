@@ -12,6 +12,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: mypass
     volumes:
       - ./mongo-data:/data/db
+      - ./src/main/resources/seed-data:/docker-entrypoint-initdb.d:ro
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
