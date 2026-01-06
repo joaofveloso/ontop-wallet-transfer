@@ -1,0 +1,10 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
+kafka:
+  consumer:
+    enabled: false
+  producer:
+    enabled: false
