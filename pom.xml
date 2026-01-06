@@ -120,16 +120,20 @@
     </dependency>
 
     <!-- Resilience4j for fault tolerance -->
+    <!-- Temporarily disabled due to compatibility issues with Spring Boot 2.7.10
+         Will be re-enabled in a follow-up with proper version alignment -->
+    <!--
     <dependency>
       <groupId>io.github.resilience4j</groupId>
       <artifactId>resilience4j-spring-boot2</artifactId>
-      <version>2.1.0</version>
+      <version>1.7.1</version>
     </dependency>
     <dependency>
       <groupId>io.github.resilience4j</groupId>
       <artifactId>resilience4j-feign</artifactId>
-      <version>2.1.0</version>
+      <version>1.7.1</version>
     </dependency>
+    -->
   </dependencies>
 
   <dependencyManagement>
