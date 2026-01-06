@@ -5,11 +5,13 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.ontop.balance.infrastructure.configs.FeignClientConfig;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Component
-@FeignClient(name = "wallets", url = "${core.wallet.client.url}")
+@FeignClient(name = "wallets", url = "${core.wallet.client.url}",
+             configuration = FeignClientConfig.class)
 public interface WalletClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/wallets/balance", consumes = "application/json")
