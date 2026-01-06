@@ -79,6 +79,6 @@ dependencies {
 
     // Resilience4j - DISABLED due to compatibility issues
     // Will be re-enabled with proper version alignment
-    // implementation("io.github.resilience4j:resilience4j-spring-boot2:2.1.0")
-    // implementation("io.github.resilience4j:resilience4j-feign:2.1.0")
+    // implementation("io.github.resilience4j:resilience4j-spring-boot2:1.7.1")
+    // implementation("io.github.resilience4j:resilience4j-feign:1.7.1")
 }
