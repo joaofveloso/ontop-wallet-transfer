@@ -118,6 +118,18 @@
       <artifactId>mongodb</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- Resilience4j for fault tolerance -->
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-spring-boot2</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-feign</artifactId>
+      <version>2.1.0</version>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>
