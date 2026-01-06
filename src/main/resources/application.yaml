@@ -7,10 +7,8 @@ springdoc:
 spring:
   data:
     mongodb:
-      uri: mongodb://myuser:mypass@mongodb:27017/?w=majority
-      database: ontop
-      username: myuser
-      password: mypass
+      uri: mongodb://${MONGO_USERNAME:ontop_user}:${MONGO_PASSWORD:ontop_pass}@${MONGO_HOST:mongodb}:27017/${MONGO_DB:ontop}?w=majority
+      auto-index-creation: true
   kafka:
     bootstrap-servers: kafka:9092
   banner:
@@ -35,7 +33,8 @@ core:
   topic: money-transfer-transactions
   wallet:
     client:
-      url: http://mockoon.tools.getontop.com:3000
+      url: ${WALLET_SERVICE_URL:https://mockoon.tools.getontop.com:3000}
 
 jwt:
-  secret: F0ApiorWr+AGvvDBjf6d3Bz6rpewBTL0RqWsg71J/HY=
+  secret: ${JWT_SECRET:base64EncodedSecretKeyMustBe256BitsOrMore}
+  expiration-hours: ${JWT_EXPIRATION_HOURS:24}
