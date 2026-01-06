@@ -46,3 +46,13 @@ services:
       - ./target/ontop-0.0.1-SNAPSHOT.jar:/app.jar
     ports:
       - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_DB=${MONGO_DB}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION_HOURS=${JWT_EXPIRATION_HOURS}
+      - WALLET_SERVICE_URL=${WALLET_SERVICE_URL}
