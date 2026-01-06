@@ -1,0 +1,37 @@
+server:
+  port: 8080
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/test_ontop?w=majority
+      auto-index-creation: true
+  kafka:
+    bootstrap-servers: localhost:9092
+  banner:
+    location: classpath:banner.txt
+
+logging:
+  level:
+    com.ontop.balance.*: DEBUG
+    com.ontop.security.*: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.data.mongodb.core.MongoAction: TRACE
+
+core:
+  ontop:
+    fee: 0.1
+    source:
+      name: ONTOP INC
+      account: 0245253419
+      currency: USD
+      routing: 028444018
+
+  topic: money-transfer-transactions-test
+  wallet:
+    client:
+      url: https://mockoon.tools.getontop.com:3000
+
+jwt:
+  secret: dGhpc0lzQVZlcnlTdHJvbmcxMjhCaXRTZWNyZXRLZXlGb3JKV1RTaWduaW5nSXRVc2VkSW5UZXN0cw== # 512 bits secret key
+  expiration-hours: 24
