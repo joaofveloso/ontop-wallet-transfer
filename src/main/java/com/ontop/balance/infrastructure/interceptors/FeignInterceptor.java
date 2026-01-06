@@ -18,8 +18,12 @@ public class FeignInterceptor implements RequestInterceptor, ResponseInterceptor
     @Override
     public Object aroundDecode(InvocationContext invocationContext) {
 
-        log.info("{} <<< {}", invocationContext.response().status(),
-                invocationContext.response().body().toString());
+        int status = invocationContext.response().status();
+
+        // Log only status, NOT the body
+        // Response bodies may contain sensitive information like account numbers, balances, PII
+        log.info("Feign response - Status: {}", status);
+
         return invocationContext.proceed();
     }
 }
