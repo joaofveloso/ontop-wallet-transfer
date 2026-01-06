@@ -15,7 +15,7 @@ import com.ontop.balance.core.model.BalanceData;
 import com.ontop.balance.core.model.RecipientData;
 import com.ontop.balance.core.model.TransactionData.TransactionStatus;
 import com.ontop.balance.core.model.commands.TransferMoneyCommand;
-import com.ontop.balance.core.model.exceptions.IllegalAmountValueExcpetion;
+import com.ontop.balance.core.model.exceptions.IllegalAmountValueException;
 import com.ontop.balance.core.model.exceptions.InsufficientBalanceException;
 import com.ontop.balance.core.model.exceptions.InvalidFeeException;
 import com.ontop.balance.core.model.exceptions.OwnershipValidationException;
@@ -183,7 +183,7 @@ class TransferMoneyFacadeTest extends BaseTestCase {
     @DisplayName("""
             GIVEN a money transfer request amout value defined as NULL,
             WHEN the handler is invoked,
-            THEN a IllegalAmountValueExcpetion should be thrown""")
+            THEN a IllegalAmountValueException should be thrown""")
     void testHandlerInvalidAmountForNullValue() {
 
         String uuid = UUID.randomUUID().toString();
@@ -196,7 +196,7 @@ class TransferMoneyFacadeTest extends BaseTestCase {
         doReturn(Optional.of(recipientData)).when(this.recipient)
                 .findRecipientById(any(ObtainRecipientByIdQuery.class));
 
-        assertThrows(IllegalAmountValueExcpetion.class,
+        assertThrows(IllegalAmountValueException.class,
                 () -> this.transferMoneyFacade.handler(command));
 
         verify(this.recipient).findRecipientById(eq(recipientQuery));
@@ -211,7 +211,7 @@ class TransferMoneyFacadeTest extends BaseTestCase {
     @DisplayName("""
             GIVEN a money transfer request amout value defined as negative,
             WHEN the handler is invoked,
-            THEN a IllegalAmountValueExcpetion should be thrown""")
+            THEN a IllegalAmountValueException should be thrown""")
     void testHandlerInvalidAmountForNegativeValue() {
         String uuid = UUID.randomUUID().toString();
         var command = new TransferMoneyCommand(uuid, 5L, BigDecimal.valueOf(-100));
@@ -223,7 +223,7 @@ class TransferMoneyFacadeTest extends BaseTestCase {
         doReturn(Optional.of(recipientData)).when(this.recipient)
                 .findRecipientById(any(ObtainRecipientByIdQuery.class));
 
-        assertThrows(IllegalAmountValueExcpetion.class,
+        assertThrows(IllegalAmountValueException.class,
                 () -> this.transferMoneyFacade.handler(command));
 
         verify(this.recipient).findRecipientById(eq(recipientQuery));
@@ -238,7 +238,7 @@ class TransferMoneyFacadeTest extends BaseTestCase {
     @DisplayName("""
             GIVEN a money transfer request to a recipient from another client,
             WHEN the handler is invoked,
-            THEN a IllegalAmountValueExcpetion should be thrown""")
+            THEN a IllegalAmountValueException should be thrown""")
     void testHandlerUnauthorizedAccessToRecipient() {
 
         String uuid = UUID.randomUUID().toString();
