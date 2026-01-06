@@ -38,5 +38,5 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     archiveFileName.set("ontop-${version.get()}.jar")
-    mainClass.set("com.ontop.balance.BalanceApplication")
+    mainClass.set("com.ontop.OntopApplication")
 }
