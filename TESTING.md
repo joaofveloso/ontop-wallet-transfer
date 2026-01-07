@@ -1,33 +1,12 @@
 # Running Tests
 
-## Unit Tests
-Unit tests run without external dependencies:
-```bash
-mvn test -Dtest='!*IntegrationTest'
-```
-
-## Integration Tests
-Integration tests use Testcontainers to spin up MongoDB automatically:
-```bash
-mvn test -Dtest='*IntegrationTest'
-```
-
 ## All Tests
 Run the complete test suite:
 ```bash
-mvn test
+./gradlew test
 ```
 
 **Note:** Integration tests use Docker to run MongoDB. Ensure Docker is installed and running.
-
-## Troubleshooting
-
-If you encounter "Broken pipe" errors when running the full test suite, try running tests sequentially:
-```bash
-mvn test -DforkCount=1 -DreuseForks=false
-```
-
-This is a known issue with parallel test execution and Testcontainers container management. All 137 tests pass successfully when run sequentially.
 
 ## Gradle Commands
 
@@ -46,9 +25,18 @@ This is a known issue with parallel test execution and Testcontainers container 
 ./gradlew bootRun
 ```
 
+### Create bootable JAR
+```bash
+./gradlew bootJar
+```
+
 ### View dependency tree
 ```bash
 ./gradlew dependencies
 ```
+
+## Migration Note
+
+This project has been migrated from Maven to Gradle. The old Maven test commands (e.g., `mvn test -Dtest='!*IntegrationTest'`) are no longer supported. All tests can now be run using Gradle commands. Tests are configured to run sequentially to avoid Testcontainers conflicts.
 
 Note: Integration tests use Docker to run MongoDB. Ensure Docker is installed and running. If you're using Podman instead of Docker, you may need to configure TestContainers to work with Podman or set up a Docker compatibility layer.

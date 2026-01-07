@@ -36,7 +36,7 @@ git@github.com:joaofveloso/ontop-wallet-transfer.git
 Then build the application:
 
 `
-mvn clean install
+./gradlew clean build
 `
 
 Finally, start the application by running:
