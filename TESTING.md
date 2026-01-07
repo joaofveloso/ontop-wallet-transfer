@@ -28,3 +28,27 @@ mvn test -DforkCount=1 -DreuseForks=false
 ```
 
 This is a known issue with parallel test execution and Testcontainers container management. All 137 tests pass successfully when run sequentially.
+
+## Gradle Commands
+
+### Run all tests
+```bash
+./gradlew test
+```
+
+### Build application
+```bash
+./gradlew clean build
+```
+
+### Run application
+```bash
+./gradlew bootRun
+```
+
+### View dependency tree
+```bash
+./gradlew dependencies
+```
+
+Note: Integration tests use Docker to run MongoDB. Ensure Docker is installed and running. If you're using Podman instead of Docker, you may need to configure TestContainers to work with Podman or set up a Docker compatibility layer.
